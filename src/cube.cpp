@@ -31,7 +31,7 @@
     #error "OpenGL required: set wxUSE_GLCANVAS to 1 and rebuild the library"
 #endif
 
-#include "cube.h"
+#include "../include/cube.h"
 
 // #ifndef wxHAS_IMAGES_IN_RESOURCES
 //     #include "../../sample.xpm"

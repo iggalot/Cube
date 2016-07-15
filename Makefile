@@ -12,8 +12,8 @@ all: cube.o
 	g++ $(BIN_DIR)/cube.o -o $(EXECUTABLE) $(WX_LIBS) $(OGL_LIBS) 
 
 #makes the object file
-cube.o: cube.cpp
-	g++ $(WX_LIBS) $(OGL_LIBS) -c cube.cpp
+cube.o: $(SRC_DIR)/cube.cpp
+	g++ $(WX_LIBS) $(OGL_LIBS) -c $(SRC_DIR)/cube.cpp
 	mv cube.o $(BIN_DIR)
 
 #deletes the executable and object files
@@ -27,4 +27,3 @@ init:
 	mkdir $(SRC_DIR)
 	mkdir $(INCL_DIR)
 	mkdir $(BUILD_DIR)
-
