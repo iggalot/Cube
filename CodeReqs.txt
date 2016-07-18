@@ -1,0 +1,5 @@
+// Code requirements
+C++ Std 14
+WX WIDGETS 3.0.2
+OPENGL3.0
+GLSL Shader Language 3.0 ES

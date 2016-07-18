@@ -38,6 +38,7 @@
 #include </usr/local/include/GLFW/glfw3.h>
 
 #include "../include/cube.h"
+#include "../include/DrawMenuDialog.h"
 
 // #ifndef wxHAS_IMAGES_IN_RESOURCES
 //     #include "../../sample.xpm"
@@ -48,15 +49,15 @@
 // ----------------------------------------------------------------------------
 
 // control ids
-enum
-{
-    SpinTimer = wxID_HIGHEST + 1
-};
+// enum
+// {
+//     SpinTimer = wxID_HIGHEST + 1
+// };
 
 // -----------------------------------------------
 // Shader functions
 // ------------------------------------------------
-// Shaders
+// Shaders -- remember the highp modifier on vec4 for 3.0 ES GLSL shaders
 const GLchar* vertexShaderSource = "#version 300 es\n"
     "layout (location = 0) in vec3 position;\n"
     "void main()\n"
@@ -591,6 +592,12 @@ wxString glGetwxString(GLenum name)
 //     EVT_MENU(wxID_CLOSE, MyFrame::OnClose)
 // wxEND_EVENT_TABLE()
 
+// MemberSelectFrame::MemberSelectFrame()
+//        : wxFrame(NULL, wxID_ANY, wxT("wxWidgets OpenGL Cube Sample"))
+// {
+//    Show();                       // show the frame
+// }
+
 MyFrame::MyFrame( bool stereoWindow )
        : wxFrame(NULL, wxID_ANY, wxT("wxWidgets OpenGL Cube Sample"))
 {
@@ -604,14 +611,25 @@ MyFrame::MyFrame( bool stereoWindow )
     // Make a menubar
     wxMenu *menu = new wxMenu;
     menu->Append(wxID_NEW);
+    menu->Append(wxID_OPEN);
+    menu->Append(wxID_SAVE);
+    menu->Append(wxID_SAVEAS);
     menu->AppendSeparator();
     menu->Append(wxID_CLOSE);
     menu->AppendSeparator();
-    menu->Append(DRAW_ONE,wxT("One"));
-    menu->Append(DRAW_TWO,wxT("Two"));
-    wxMenuBar *menuBar = new wxMenuBar;
-    menuBar->Append(menu, wxT("&Cube"));
 
+    wxMenu *menu_draw = new wxMenu;
+    menu_draw->Append(DRAW_SELECT,wxT("Select Shape"));
+    menu_draw->Append(DRAW_ONE,wxT("One"));
+    menu_draw->Append(DRAW_TWO,wxT("Two"));
+
+    wxMenu *menu_help = new wxMenu;
+    menu_help->Append(wxID_ABOUT);
+
+    wxMenuBar *menuBar = new wxMenuBar;
+    menuBar->Append(menu, wxT("&File"));
+    menuBar->Append(menu_draw, wxT("&Draw"));
+    menuBar->Append(menu_help, wxT("&Help"));
     SetMenuBar(menuBar);
 
     CreateStatusBar();
@@ -664,12 +682,21 @@ MyFrame::MyFrame( bool stereoWindow )
     Connect(wxID_NEW, wxEVT_COMMAND_MENU_SELECTED,
             wxCommandEventHandler(MyFrame::OnNewWindow));
     Connect(wxID_CLOSE, wxEVT_COMMAND_MENU_SELECTED,
-            wxCommandEventHandler(MyFrame::OnClose));   
+            wxCommandEventHandler(MyFrame::OnClose));  
+    Connect(DRAW_SELECT, wxEVT_COMMAND_MENU_SELECTED,
+            wxCommandEventHandler(MyFrame::OnDrawSelect));  
     Connect(DRAW_ONE, wxEVT_COMMAND_MENU_SELECTED,
             wxCommandEventHandler(MyFrame::OnDrawOne));   
     Connect(DRAW_TWO, wxEVT_COMMAND_MENU_SELECTED,
             wxCommandEventHandler(MyFrame::OnDrawTwo)); 
-
+    Connect(wxID_ABOUT, wxEVT_COMMAND_MENU_SELECTED,
+            wxCommandEventHandler(MyFrame::OnAbout));
+    Connect(wxID_SAVE, wxEVT_COMMAND_MENU_SELECTED,
+            wxCommandEventHandler(MyFrame::OnSave));
+    Connect(wxID_SAVEAS, wxEVT_COMMAND_MENU_SELECTED,
+            wxCommandEventHandler(MyFrame::OnSaveAs));
+    Connect(wxID_FILE, wxEVT_COMMAND_MENU_SELECTED,
+            wxCommandEventHandler(MyFrame::OnFile));
 }
 
 void MyFrame::OnClose(wxCommandEvent& WXUNUSED(event))
@@ -678,9 +705,29 @@ void MyFrame::OnClose(wxCommandEvent& WXUNUSED(event))
     Close(true);
 }
 
+void IncompleteAction() {
+          wxMessageBox( "INCOMPLETE ACTION",
+                 "This action is not complete", wxOK | wxICON_INFORMATION ); 
+}
+
 void MyFrame::OnNewWindow( wxCommandEvent& WXUNUSED(event) )
 {
     new MyFrame();
+}
+
+void MyFrame::OnDrawSelect( wxCommandEvent& WXUNUSED(event) )
+{
+  DrawMenuDialog dialog = DrawMenuDialog(wxT("Select shape"));
+
+  if (dialog.getSelected() == wxID_OK)
+    std::cout << "OK -- so do stuff now" << std::endl;
+  else
+    std::cout << "Nothing to do...." << std::endl;
+//  else if (draw_menu_select == wxID_CLOSE)
+//    std::cout << "CANCELLED" << std::endl;
+//  else
+//    std::cout << "Another option selected" << std::endl;
+    dialog.Destroy();
 }
 
 void MyFrame::OnDrawOne( wxCommandEvent& WXUNUSED(event) )
@@ -697,7 +744,27 @@ void MyFrame::OnDrawTwo( wxCommandEvent& WXUNUSED(event) )
     m_canvas->Update();
 }
 
-// void MyFrame::OnNewStereoWindow( wxCommandEvent& WXUNUSED(event) )
-// {
-//     new MyFrame(true);
-// }
+
+
+void MyFrame::OnFile(wxCommandEvent& WXUNUSED(event) )
+{
+    IncompleteAction();
+}
+
+void MyFrame::OnSave(wxCommandEvent& WXUNUSED(event) )
+{
+    IncompleteAction();
+}
+
+void MyFrame::OnSaveAs(wxCommandEvent& WXUNUSED(event) )
+{
+    IncompleteAction();
+}
+
+
+
+void MyFrame::OnAbout(wxCommandEvent& WXUNUSED(event) )
+{
+       wxMessageBox( "SketcherApp v1.0 - by James Allen.\nCopyright 2016",
+                 "About SketcherApp", wxOK | wxICON_INFORMATION );
+}

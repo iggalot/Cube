@@ -17,7 +17,6 @@
 
 //forward declaration
 class TestGLCanvas;
-//class DrawMenuDialog
 
 // the rendering context used by all GL canvases
 class TestGLContext : public wxGLContext
@@ -67,24 +66,12 @@ private:
     TestGLCanvas *m_canvas;
     void OnClose(wxCommandEvent& event);
     void OnNewWindow(wxCommandEvent& event);
-    void OnFile(wxCommandEvent& event);
-    void OnSave(wxCommandEvent& event);
-    void OnSaveAs(wxCommandEvent& event);
-    void OnAbout(wxCommandEvent& event);
     void OnDrawOne(wxCommandEvent& event);
     void OnDrawTwo(wxCommandEvent& event);
-    void OnDrawSelect(wxCommandEvent& event);
+    //void OnNewStereoWindow(wxCommandEvent& event);
+
+    //wxDECLARE_EVENT_TABLE();
 };
-
-// // Define the member selection frame
-// class MemberSelectFrame : public wxFrame
-// {
-// public:
-//     MemberSelectFrame();
-
-// private:
-
-// };
 
 class TestGLCanvas : public wxGLCanvas
 {
@@ -114,10 +101,8 @@ private:
 enum
 {
     NEW_STEREO_WINDOW = wxID_HIGHEST + 1,
-    DRAW_ONE = wxID_HIGHEST + 2,
-    DRAW_TWO = wxID_HIGHEST + 3,
-    DRAW_SELECT = wxID_HIGHEST + 4,
-    SpinTimer = wxID_HIGHEST + 5
+    DRAW_ONE = 1,
+    DRAW_TWO = 2
 };
 
 #endif // _WX_CUBE_H_
