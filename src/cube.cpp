@@ -438,6 +438,7 @@ wxBEGIN_EVENT_TABLE(TestGLCanvas, wxGLCanvas)
     EVT_PAINT(TestGLCanvas::OnPaint)
     EVT_KEY_DOWN(TestGLCanvas::OnKeyDown)
     EVT_TIMER(SpinTimer, TestGLCanvas::OnSpinTimer)
+    EVT_MOTION(TestGLCanvas::OnMouseMove)
 wxEND_EVENT_TABLE()
 
 TestGLCanvas::TestGLCanvas(wxWindow *parent, int *attribList)
@@ -468,6 +469,17 @@ TestGLCanvas::TestGLCanvas(wxWindow *parent, int *attribList)
             ++i;
         }
     }
+    // // EVT_PAINT(TestGLCanvas::OnPaint)
+    // // EVT_KEY_DOWN(TestGLCanvas::OnKeyDown)
+    // // EVT_TIMER(SpinTimer, TestGLCanvas::OnSpinTimer)
+
+    // Connect(wxID_NEW, wxEVT_COMMAND_MENU_SELECTED,
+    //    wxCommandEventHandler(MyFrame::OnNewWindow));
+
+    // this should get the frame that is the parent of the canvas.  Must case it
+    // to (MyFrame*) because the default GetParent() returns a wxWindow which
+    // MyFrame is also derived from.
+    myParentFrame = (MyFrame *) this->GetParent();  
 }
 
 void TestGLCanvas::OnPaint(wxPaintEvent& WXUNUSED(event))
@@ -564,20 +576,37 @@ void TestGLCanvas::OnSpinTimer(wxTimerEvent& WXUNUSED(event))
     Spin(0.0, 4.0);
 }
 
-wxString glGetwxString(GLenum name)
+void TestGLCanvas::OnMouseMove(wxMouseEvent& event)
 {
-    const GLubyte *v = glGetString(name);
-    if ( v == 0 )
-    {
-        // The error is not important. It is GL_INVALID_ENUM.
-        // We just want to clear the error stack.
-        glGetError();
-
-        return wxString();
-    }
-
-    return wxString((const char*)v);
+    this->myParentFrame->getStaticLabel()->SetLabel(
+        wxT("Window Coords: ")
+        +wxString::FromDouble(event.GetX())
+        +wxT(",")
+        +wxString::FromDouble(event.GetY())
+    );
+    // std::cout << "Coord: (" << wxString::FromDouble(event.GetX()) << " , " << 
+    //          wxString::FromDouble(event.GetY()) << ")" << std::endl;
+    // // wxMessageBox("X Coordinate: "+wxString::FromDouble(event.GetX())+"\nY Coordinate: "+wxString::FromDouble(event.GetY()),
+    // //    "Mouse Move Event",
+    // //    wxOK);  
 }
+
+// wxString glGetwxString(GLenum name)
+// {
+//     const GLubyte *v = glGetString(name);
+//     if ( v == 0 )
+//     {
+//         // The error is not important. It is GL_INVALID_ENUM.
+//         // We just want to clear the error stack.
+//         glGetError();
+
+//         return wxString();
+//     }
+
+//     return wxString((const char*)v);
+// }
+
+
 
 
 // ----------------------------------------------------------------------------
@@ -605,6 +634,8 @@ MyFrame::MyFrame( bool stereoWindow )
     int stereoAttribList[] = { WX_GL_RGBA, WX_GL_DOUBLEBUFFER, WX_GL_STEREO, 0 };
 
     m_canvas = new TestGLCanvas(this, stereoWindow ? stereoAttribList : NULL);
+    m_staticlabel = new wxStaticText( this, wxID_ANY, "Example", 
+        wxDefaultPosition, wxDefaultSize, wxALIGN_LEFT);
 
     //SetIcon(wxICON(sample));
 
@@ -650,6 +681,14 @@ MyFrame::MyFrame( bool stereoWindow )
     );
 
     topsizer->Add(
+           m_staticlabel,
+           0,              // makes unstretchable in direction of the sizer
+           wxEXPAND |      // makes expandable in opposite direction of the sizer
+           wxLEFT | wxRIGHT,          // makes border all around
+           10               // set border width
+    );
+
+    topsizer->Add(
            new wxTextCtrl( this, -1, "My text.", wxDefaultPosition, wxSize(600,40), wxTE_MULTILINE),
            0,              // makes unstretchable in direction of the sizer
            wxEXPAND |      // makes expandable in opposite direction of the sizer
@@ -657,13 +696,13 @@ MyFrame::MyFrame( bool stereoWindow )
            10              // set border width
     );
     
-   drawingsizer->Add(
+    drawingsizer->Add(
            topsizer,
            0,
            wxALIGN_CENTER
-   );
-   SetSizerAndFit(drawingsizer); // resizes and fits all the sizers for our frame dimensions
-   Show();                       // show the frame
+    );
+    SetSizerAndFit(drawingsizer); // resizes and fits all the sizers for our frame dimensions
+    Show();                       // show the frame
 
     // test IsDisplaySupported() function:
     static const int attribs[] = { WX_GL_RGBA, WX_GL_DOUBLEBUFFER, 0 };

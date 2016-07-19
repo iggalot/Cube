@@ -8,17 +8,23 @@ EXECUTABLE = myapp
 
 
 #makes the executable
-all: cube.o DrawMenuDialog.o
+all: $(EXECUTABLE)
+
+$(EXECUTABLE): $(BIN_DIR)/cube.o $(BIN_DIR)/DrawMenuDialog.o
 	g++ $(BIN_DIR)/cube.o $(BIN_DIR)/DrawMenuDialog.o -o $(EXECUTABLE) $(WX_LIBS) $(OGL_LIBS) 
 
 #makes the object file
-cube.o: $(SRC_DIR)/cube.cpp
+$(BIN_DIR)/cube.o: $(SRC_DIR)/cube.cpp
 	g++ $(WX_LIBS) $(OGL_LIBS) -c $(SRC_DIR)/cube.cpp
 	mv cube.o $(BIN_DIR)
 
-DrawMenuDialog.o: $(SRC_DIR)/DrawMenuDialog.cpp
+$(BIN_DIR)/DrawMenuDialog.o: $(SRC_DIR)/DrawMenuDialog.cpp
 	g++ $(WX_LIBS) $(OGL_LIBS) -c $(SRC_DIR)/DrawMenuDialog.cpp
 	mv DrawMenuDialog.o $(BIN_DIR)
+
+#Needed for items that aren't actually made (i.e. no "all" file is made).  Without this
+#Make will never find an "all" file and thus have to rebuild everything.
+.PHONY: all clean init
 
 #deletes the executable and object files
 clean:
@@ -31,3 +37,5 @@ init:
 	mkdir $(SRC_DIR)
 	mkdir $(INCL_DIR)
 	mkdir $(BUILD_DIR)
+
+

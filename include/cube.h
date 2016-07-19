@@ -62,9 +62,12 @@ class MyFrame : public wxFrame
 {
 public:
     MyFrame(bool stereoWindow = false);
+    wxStaticText* getStaticLabel() {return m_staticlabel;}
 
 private:
     TestGLCanvas *m_canvas;
+    wxStaticText *m_staticlabel;  // for displaying drawing screen information
+    
     void OnClose(wxCommandEvent& event);
     void OnNewWindow(wxCommandEvent& event);
     void OnFile(wxCommandEvent& event);
@@ -95,10 +98,12 @@ public:
 
 private:
     GLuint m_current_drawnum;
+    MyFrame *myParentFrame;
     void OnPaint(wxPaintEvent& event);
     void Spin(float xSpin, float ySpin);
     void OnKeyDown(wxKeyEvent& event);
     void OnSpinTimer(wxTimerEvent& WXUNUSED(event));
+    void OnMouseMove(wxMouseEvent& event);
 
     // angles of rotation around x- and y- axis
     float m_xangle,
