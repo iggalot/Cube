@@ -376,6 +376,104 @@ void TestGLContext::DrawRotatedCube(float xangle, float yangle)
     CheckGLError();
 }
 
+void TestGLContext::DrawCursor() {
+
+   glewInit();
+std::cout << "Drawing Cursor" << std::endl;
+
+// Build and compile our shader program
+    // Vertex shader
+    GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
+    glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
+    glCompileShader(vertexShader);
+    // Check for compile time errors
+    GLint success;
+    GLchar infoLog[512];
+    glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
+    if (!success)
+    {
+        glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
+        std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" << infoLog << std::endl;
+    }
+    // Fragment shader
+    GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+    glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
+    glCompileShader(fragmentShader);
+    // Check for compile time errors
+    glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
+    if (!success)
+    {
+        glGetShaderInfoLog(fragmentShader, 512, NULL, infoLog);
+        std::cout << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n" << infoLog << std::endl;
+    }
+    // Link shaders
+    GLuint shaderProgram = glCreateProgram();
+    glAttachShader(shaderProgram, vertexShader);
+    glAttachShader(shaderProgram, fragmentShader);
+    glLinkProgram(shaderProgram);
+    // Check for linking errors
+    glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
+    if (!success) {
+        glGetProgramInfoLog(shaderProgram, 512, NULL, infoLog);
+        std::cout << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n" << infoLog << std::endl;
+    }
+    glDeleteShader(vertexShader);
+    glDeleteShader(fragmentShader);
+
+    // Set up vertex data (and buffer(s)) and attribute pointers
+    GLfloat left_x = (orig_canvas->getCurrMousePos()->x - 0.5 * orig_canvas->CANVAS_WIDTH) / (0.5 * orig_canvas->CANVAS_WIDTH);
+    GLfloat left_y = (orig_canvas->CANVAS_HEIGHT - 2.0 * (orig_canvas->getCurrMousePos()->y)) / (orig_canvas->CANVAS_HEIGHT);
+ 
+    std::cout << "Canvas Dims: " << orig_canvas->CANVAS_WIDTH << " x " << orig_canvas->CANVAS_HEIGHT << std::endl;
+    std::cout << "WindowCoords: " << orig_canvas->getCurrMousePos()->x << " , " << orig_canvas->getCurrMousePos()->y << std::endl;
+    std::cout << "H: " << -1.0 << "," << left_y << " to " << 1.0 << "," << left_y << std::endl;
+    std::cout << "V: " << left_x << "," << 1.0 << " to " << left_x << "," << -1.0 << std::endl;
+
+    // Coordinates of our cross hairs
+    GLfloat vertices[] = {
+        -1.0f,  left_y, 0.0f, // Left  
+         1.0f,  left_y, 0.0f, // Right 
+         left_x,  1.0f, 0.0f, // Top  
+         left_x, -1.0f, 0.0f  // Bottom    
+    };
+
+    int num_pts = sizeof(vertices) / (3 * sizeof(GLfloat));  // of points in vertices
+    //std::cout << num_pts;
+
+    GLuint VBO, VAO;
+    glGenVertexArrays(1, &VAO);
+    glGenBuffers(1, &VBO);
+    // Bind the Vertex Array Object first, then bind and set vertex buffer(s) and attribute pointer(s).
+    glBindVertexArray(VAO);
+
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
+    glEnableVertexAttribArray(0);
+
+    glBindBuffer(GL_ARRAY_BUFFER, 0); // Note that this is allowed, the call to glVertexAttribPointer registered VBO as the currently bound vertex buffer object so afterwards we can safely unbind
+
+    glBindVertexArray(0); // Unbind VAO (it's always a good thing to unbind any buffer/array to prevent strange bugs)
+
+    // Check if any events have been activiated (key pressed, mouse moved etc.) and call corresponding response functions
+    glfwPollEvents();
+
+    // Render
+
+    // Draw our first triangle
+    glUseProgram(shaderProgram);
+    glBindVertexArray(VAO);
+    glDrawArrays(GL_LINES, 0, num_pts);
+    glBindVertexArray(0);
+
+    // Properly de-allocate all resources once they've outlived their purpose
+    glUseProgram(0); // stop using a shader program
+    glDeleteVertexArrays(1, &VAO);
+    glDeleteBuffers(1, &VBO);
+
+}
+
 
 // ----------------------------------------------------------------------------
 // MyApp: the application object
@@ -448,7 +546,7 @@ TestGLCanvas::TestGLCanvas(wxWindow *parent, int *attribList)
     // viewport settings.
     : wxGLCanvas(parent, wxID_ANY, attribList,
                  wxDefaultPosition, 
-                 wxSize(600,600),
+                 wxSize(CANVAS_WIDTH, CANVAS_HEIGHT),
 //                 wxDefaultSize,
                  wxFULL_REPAINT_ON_RESIZE),
       m_xangle(30.0),
@@ -458,6 +556,7 @@ TestGLCanvas::TestGLCanvas(wxWindow *parent, int *attribList)
       m_stereoWarningAlreadyDisplayed(false)
 {
     m_current_drawnum =0;
+    currMousePos = new Point(0,0,0);
 
     if ( attribList )
     {
@@ -525,6 +624,9 @@ void TestGLCanvas::OnPaint(wxPaintEvent& WXUNUSED(event))
             wxLogError("Stereo not supported by the graphics card.");
         }
     }
+
+    canvas.DrawCursor();
+
     SwapBuffers();
 }
 
@@ -576,8 +678,15 @@ void TestGLCanvas::OnSpinTimer(wxTimerEvent& WXUNUSED(event))
     Spin(0.0, 4.0);
 }
 
+void TestGLCanvas::setCurrMousePos(GLint x, GLint y, GLint z) {
+    delete currMousePos;  // delete the old
+    currMousePos = new Point(x,y,z);  // make new
+}
+
 void TestGLCanvas::OnMouseMove(wxMouseEvent& event)
 {
+    this->setCurrMousePos(event.GetX(), event.GetY(), 0);
+
     this->myParentFrame->getStaticLabel()->SetLabel(
         wxT("Window Coords: ")
         +wxString::FromDouble(event.GetX())
@@ -588,7 +697,10 @@ void TestGLCanvas::OnMouseMove(wxMouseEvent& event)
     //          wxString::FromDouble(event.GetY()) << ")" << std::endl;
     // // wxMessageBox("X Coordinate: "+wxString::FromDouble(event.GetX())+"\nY Coordinate: "+wxString::FromDouble(event.GetY()),
     // //    "Mouse Move Event",
-    // //    wxOK);  
+    // //    wxOK);
+
+    this->Refresh();  // mark the frame as dirty
+    this->Update();  // immediately update the window  
 }
 
 // wxString glGetwxString(GLenum name)
@@ -605,6 +717,7 @@ void TestGLCanvas::OnMouseMove(wxMouseEvent& event)
 
 //     return wxString((const char*)v);
 // }
+
 
 
 
@@ -800,10 +913,19 @@ void MyFrame::OnSaveAs(wxCommandEvent& WXUNUSED(event) )
     IncompleteAction();
 }
 
-
-
 void MyFrame::OnAbout(wxCommandEvent& WXUNUSED(event) )
 {
        wxMessageBox( "SketcherApp v1.0 - by James Allen.\nCopyright 2016",
                  "About SketcherApp", wxOK | wxICON_INFORMATION );
+}
+
+// Default constructor for Point
+Point::Point() {
+    Point(0,0,0);
+}
+
+Point::Point(GLint x_pt, GLint y_pt, GLint z_pt) {
+    x = x_pt;
+    y = y_pt;
+    z = z_pt;
 }

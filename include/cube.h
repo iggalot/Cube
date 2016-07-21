@@ -19,6 +19,17 @@
 class TestGLCanvas;
 //class DrawMenuDialog
 
+class Point 
+{
+public:
+    Point();
+    Point(int x, int y, int z);
+
+    GLint x;
+    GLint y;
+    GLint z;    
+};
+
 // the rendering context used by all GL canvases
 class TestGLContext : public wxGLContext
 {
@@ -27,6 +38,7 @@ public:
 
     // render the cube showing it at given angles
     void DrawRotatedCube(float xangle, float yangle);
+    void DrawCursor();
     void DoDrawCubeOne(float xangle, float yangle);
     void DoDrawCubeTwo(float xangle, float yangle);
 
@@ -63,11 +75,11 @@ class MyFrame : public wxFrame
 public:
     MyFrame(bool stereoWindow = false);
     wxStaticText* getStaticLabel() {return m_staticlabel;}
-
+ 
 private:
     TestGLCanvas *m_canvas;
     wxStaticText *m_staticlabel;  // for displaying drawing screen information
-    
+
     void OnClose(wxCommandEvent& event);
     void OnNewWindow(wxCommandEvent& event);
     void OnFile(wxCommandEvent& event);
@@ -92,11 +104,18 @@ private:
 class TestGLCanvas : public wxGLCanvas
 {
 public:
+    static const GLint CANVAS_HEIGHT = 600;
+    static const GLint CANVAS_WIDTH = 600;
+
     TestGLCanvas(wxWindow *parent, int *attribList = NULL);
     GLuint getCurrentDrawNum() {return m_current_drawnum;}
     void setCurrentDrawNum(GLuint num) {m_current_drawnum = num;}
+    Point *getCurrMousePos() {return currMousePos;}
+    void setCurrMousePos(GLint x, GLint y, GLint z);  // records the mouse loc in window coords
 
+    
 private:
+    Point *currMousePos;           // for storing the current mouse position
     GLuint m_current_drawnum;
     MyFrame *myParentFrame;
     void OnPaint(wxPaintEvent& event);
