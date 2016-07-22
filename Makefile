@@ -13,7 +13,7 @@ all: $(EXECUTABLE)
 $(EXECUTABLE): $(BIN_DIR)/cube.o $(BIN_DIR)/DrawMenuDialog.o
 	g++ $(BIN_DIR)/cube.o $(BIN_DIR)/DrawMenuDialog.o -o $(EXECUTABLE) $(WX_LIBS) $(OGL_LIBS) 
 
-#makes the object files
+#makes the object file
 $(BIN_DIR)/cube.o: $(SRC_DIR)/cube.cpp
 	g++ $(WX_LIBS) $(OGL_LIBS) -c $(SRC_DIR)/cube.cpp
 	mv cube.o $(BIN_DIR)

@@ -14,21 +14,11 @@
 #define _WX_CUBE_H_
 
 #include "wx/glcanvas.h"
+#include "../include/Geometry.h"
 
 //forward declaration
 class TestGLCanvas;
 //class DrawMenuDialog
-
-class Point 
-{
-public:
-    Point();
-    Point(int x, int y, int z);
-
-    GLint x;
-    GLint y;
-    GLint z;    
-};
 
 // the rendering context used by all GL canvases
 class TestGLContext : public wxGLContext
@@ -38,9 +28,9 @@ public:
 
     // render the cube showing it at given angles
     void DrawRotatedCube(float xangle, float yangle);
-    void DrawCursor();
     void DoDrawCubeOne(float xangle, float yangle);
     void DoDrawCubeTwo(float xangle, float yangle);
+    void DrawCrosshairs();
 
 private:
     // textures for the cube faces
@@ -75,11 +65,11 @@ class MyFrame : public wxFrame
 public:
     MyFrame(bool stereoWindow = false);
     wxStaticText* getStaticLabel() {return m_staticlabel;}
- 
+
 private:
     TestGLCanvas *m_canvas;
     wxStaticText *m_staticlabel;  // for displaying drawing screen information
-
+    
     void OnClose(wxCommandEvent& event);
     void OnNewWindow(wxCommandEvent& event);
     void OnFile(wxCommandEvent& event);
@@ -104,19 +94,23 @@ private:
 class TestGLCanvas : public wxGLCanvas
 {
 public:
-    static const GLint CANVAS_HEIGHT = 600;
-    static const GLint CANVAS_WIDTH = 600;
+    static const int CANVAS_WIDTH = 600;
+    static const int CANVAS_HEIGHT = 600;
 
     TestGLCanvas(wxWindow *parent, int *attribList = NULL);
+
+    // methods
     GLuint getCurrentDrawNum() {return m_current_drawnum;}
     void setCurrentDrawNum(GLuint num) {m_current_drawnum = num;}
-    Point *getCurrMousePos() {return currMousePos;}
-    void setCurrMousePos(GLint x, GLint y, GLint z);  // records the mouse loc in window coords
+    void setCurrMousePos(int x, int y, int z) {
+        delete m_currMousePos; 
+        m_currMousePos = new Point(x,y,z);
+    }
+    Point* getCurrMousePos() {return m_currMousePos;}
 
-    
 private:
-    Point *currMousePos;           // for storing the current mouse position
     GLuint m_current_drawnum;
+    Point* m_currMousePos;
     MyFrame *myParentFrame;
     void OnPaint(wxPaintEvent& event);
     void Spin(float xSpin, float ySpin);
