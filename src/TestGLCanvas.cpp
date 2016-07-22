@@ -40,6 +40,8 @@
 #include "../include/cube.h"
 //#include "../include/DrawMenuDialog.h"
 #include "../include/TestGLCanvas.h"
+#include "../include/TestGLContext.h"
+
 // ----------------------------------------------------------------------------
 // TestGLCanvas
 // ----------------------------------------------------------------------------

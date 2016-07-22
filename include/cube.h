@@ -19,25 +19,8 @@
 
 //forward declaration
 class TestGLCanvas;
+class TestGLContext;
 //class DrawMenuDialog
-
-// the rendering context used by all GL canvases
-class TestGLContext : public wxGLContext
-{
-public:
-    TestGLContext(wxGLCanvas *canvas);
-
-    // render the cube showing it at given angles
-    void DrawRotatedCube(float xangle, float yangle);
-    void DoDrawCubeOne(float xangle, float yangle);
-    void DoDrawCubeTwo(float xangle, float yangle);
-    void DrawCrosshairs();
-
-private:
-    // textures for the cube faces
-    TestGLCanvas *orig_canvas;
-    GLuint m_textures[6];
-};
 
 // Define a new application type
 class MyApp : public wxApp
