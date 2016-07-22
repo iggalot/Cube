@@ -10,10 +10,14 @@ EXECUTABLE = myapp
 #makes the executable
 all: $(EXECUTABLE)
 
-$(EXECUTABLE): $(BIN_DIR)/cube.o $(BIN_DIR)/DrawMenuDialog.o
-	g++ $(BIN_DIR)/cube.o $(BIN_DIR)/DrawMenuDialog.o -o $(EXECUTABLE) $(WX_LIBS) $(OGL_LIBS) 
+$(EXECUTABLE): $(BIN_DIR)/TestGLCanvas.o $(BIN_DIR)/cube.o $(BIN_DIR)/DrawMenuDialog.o
+	g++ $(BIN_DIR)/TestGLCanvas.o $(BIN_DIR)/cube.o $(BIN_DIR)/DrawMenuDialog.o -o $(EXECUTABLE) $(WX_LIBS) $(OGL_LIBS) 
 
 #makes the object file
+$(BIN_DIR)/TestGLCanvas.o: $(SRC_DIR)/TestGLCanvas.cpp
+	g++ $(WX_LIBS) $(OGL_LIBS) -c $(SRC_DIR)/TestGLCanvas.cpp
+	mv TestGLCanvas.o $(BIN_DIR)
+
 $(BIN_DIR)/cube.o: $(SRC_DIR)/cube.cpp
 	g++ $(WX_LIBS) $(OGL_LIBS) -c $(SRC_DIR)/cube.cpp
 	mv cube.o $(BIN_DIR)
