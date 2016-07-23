@@ -7,14 +7,13 @@
 #ifndef _TESTGLCANVAS_H_
 #define _TESTGLCANVAS_H_
 
-//#include "wx/glcanvas.h"
 #include "wx/glcanvas.h"
-//#include "../include/cube.h"
-//#include "../include/Geometry.h"
 
 // forward declaration
+//class wxGLCanvas;
 class MyFrame;
 class Point;
+class DrawObject;
 
 class TestGLCanvas : public wxGLCanvas
 {
@@ -27,13 +26,13 @@ public:
     // methods
     GLuint getCurrentDrawNum() {return m_current_drawnum;}
     void setCurrentDrawNum(GLuint num) {m_current_drawnum = num;}
-    void setCurrMousePos(int x, int y, int z) {
-        delete m_currMousePos; 
-        m_currMousePos = new Point(x,y,z);
-    }
+    void setCurrMousePos(int x, int y, int z);
     Point* getCurrMousePos() {return m_currMousePos;}
 
+    DrawObject* m_crosshair;
+
 private:
+
     GLuint m_current_drawnum;
     Point* m_currMousePos;
     MyFrame *myParentFrame;

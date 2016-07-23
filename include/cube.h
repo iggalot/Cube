@@ -14,7 +14,7 @@
 #define _WX_CUBE_H_
 
 #include "wx/glcanvas.h"
-#include "../include/Geometry.h"
+//#include "../include/Geometry.h"
 //#include "../include/TestGLCanvas.h"
 
 //forward declaration

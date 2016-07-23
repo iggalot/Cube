@@ -10,8 +10,8 @@ EXECUTABLE = myapp
 #makes the executable
 all: $(EXECUTABLE)
 
-$(EXECUTABLE): $(BIN_DIR)/TestGLCanvas.o $(BIN_DIR)/TestGLContext.o $(BIN_DIR)/cube.o $(BIN_DIR)/DrawMenuDialog.o
-	g++ $(BIN_DIR)/TestGLContext.o $(BIN_DIR)/TestGLCanvas.o $(BIN_DIR)/cube.o $(BIN_DIR)/DrawMenuDialog.o -o $(EXECUTABLE) $(WX_LIBS) $(OGL_LIBS) 
+$(EXECUTABLE): $(BIN_DIR)/TestGLCanvas.o $(BIN_DIR)/TestGLContext.o $(BIN_DIR)/cube.o $(BIN_DIR)/DrawMenuDialog.o $(BIN_DIR)/DrawObject.o
+	g++ $(BIN_DIR)/TestGLContext.o $(BIN_DIR)/TestGLCanvas.o $(BIN_DIR)/cube.o $(BIN_DIR)/DrawMenuDialog.o $(BIN_DIR)/DrawObject.o -o $(EXECUTABLE) $(WX_LIBS) $(OGL_LIBS) 
 
 #makes the object file
 $(BIN_DIR)/TestGLCanvas.o: $(SRC_DIR)/TestGLCanvas.cpp
@@ -29,6 +29,10 @@ $(BIN_DIR)/cube.o: $(SRC_DIR)/cube.cpp
 $(BIN_DIR)/DrawMenuDialog.o: $(SRC_DIR)/DrawMenuDialog.cpp
 	g++ $(WX_LIBS) $(OGL_LIBS) -c $(SRC_DIR)/DrawMenuDialog.cpp
 	mv DrawMenuDialog.o $(BIN_DIR)
+
+$(BIN_DIR)/DrawObject.o: $(SRC_DIR)/DrawObject.cpp
+	g++ $(WX_LIBS) $(OGL_LIBS) -c $(SRC_DIR)/DrawObject.cpp
+	mv DrawObject.o $(BIN_DIR)
 
 #Needed for items that aren't actually made (i.e. no "all" file is made).  Without this
 #Make will never find an "all" file and thus have to rebuild everything.

@@ -31,7 +31,7 @@ public:
     void DrawRotatedCube(float xangle, float yangle);
     void DoDrawCubeOne(float xangle, float yangle);
     void DoDrawCubeTwo(float xangle, float yangle);
-    void DrawCrosshairs();
+ //   void DrawCrosshairs();
 
 private:
     // textures for the cube faces

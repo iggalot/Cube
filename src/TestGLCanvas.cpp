@@ -38,9 +38,10 @@
 #include </usr/local/include/GLFW/glfw3.h>
 
 #include "../include/cube.h"
-//#include "../include/DrawMenuDialog.h"
+#include "../include/Geometry.h"
 #include "../include/TestGLCanvas.h"
 #include "../include/TestGLContext.h"
+#include "../include/DrawObject.h"
 
 // ----------------------------------------------------------------------------
 // TestGLCanvas
@@ -69,8 +70,9 @@ TestGLCanvas::TestGLCanvas(wxWindow *parent, int *attribList)
       m_useStereo(false),
       m_stereoWarningAlreadyDisplayed(false)
 {
-    m_current_drawnum =0;
+    m_current_drawnum = 0;
     m_currMousePos = new Point();
+    m_crosshair = new Crosshairs();
 
     if ( attribList )
     {
@@ -201,7 +203,7 @@ void TestGLCanvas::OnMouseMove(wxMouseEvent& event)
     );
 
     Refresh();  // mark the frame as dirty
-    Update();  // immediately update the window
+    //   Update();  // immediately update the window
 
     // std::cout << "Coord: (" << wxString::FromDouble(event.GetX()) << " , " << 
     //          wxString::FromDouble(event.GetY()) << ")" << std::endl;
@@ -224,3 +226,8 @@ void TestGLCanvas::OnMouseMove(wxMouseEvent& event)
 
 //     return wxString((const char*)v);
 // }
+
+void TestGLCanvas::setCurrMousePos(int x, int y, int z) {
+    delete m_currMousePos; 
+    m_currMousePos = new Point(x,y,z);
+}
