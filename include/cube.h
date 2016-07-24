@@ -20,25 +20,22 @@
 //forward declaration
 class TestGLCanvas;
 class TestGLContext;
+class MyFrame;
 //class DrawMenuDialog
 
 // Define a new application type
 class MyApp : public wxApp
 {
 public:
-    MyApp() { m_glContext = NULL; }
-
-    // Returns the shared context used by all frames and sets it as current for
-    // the given canvas.
-    TestGLContext& GetContext(wxGLCanvas *canvas);
+    MyApp() { }
 
     // virtual wxApp methods
     virtual bool OnInit();
     virtual int OnExit();
 
+    MyFrame *mainFrame;
 private:
-    // the GL context we use for all our mono rendering windows
-    TestGLContext *m_glContext;
+
 };
 
 // Define a new frame type
@@ -47,11 +44,18 @@ class MyFrame : public wxFrame
 public:
     MyFrame(bool stereoWindow = false);
     wxStaticText* getStaticLabel() {return m_staticlabel;}
+    
+    // // Returns the shared context used by all frames and sets it as current for
+    // // the given canvas.
+    // TestGLContext& GetContext(wxGLCanvas *canvas);
 
 private:
     TestGLCanvas *m_canvas;
     wxStaticText *m_staticlabel;  // for displaying drawing screen information
     
+    // the GL context we use for all our mono rendering windows
+ //   TestGLContext *m_glContext;
+
     void OnClose(wxCommandEvent& event);
     void OnNewWindow(wxCommandEvent& event);
     void OnFile(wxCommandEvent& event);

@@ -14,6 +14,7 @@
 class MyFrame;
 class Point;
 class DrawObject;
+class TestGLContext;
 
 class TestGLCanvas : public wxGLCanvas
 {
@@ -28,14 +29,18 @@ public:
     void setCurrentDrawNum(GLuint num) {m_current_drawnum = num;}
     void setCurrMousePos(int x, int y, int z);
     Point* getCurrMousePos() {return m_currMousePos;}
+    // Returns the shared context used by all frames and sets it as current for
+    // the given canvas.
+    TestGLContext& GetContext(wxGLCanvas *canvas);
 
     DrawObject* m_crosshair;
-
+    TestGLContext* m_glContext;
 private:
 
     GLuint m_current_drawnum;
     Point* m_currMousePos;
     MyFrame *myParentFrame;
+    
     void OnPaint(wxPaintEvent& event);
     void Spin(float xSpin, float ySpin);
     void OnKeyDown(wxKeyEvent& event);

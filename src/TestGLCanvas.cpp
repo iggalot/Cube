@@ -74,6 +74,10 @@ TestGLCanvas::TestGLCanvas(wxWindow *parent, int *attribList)
     m_currMousePos = new Point();
     m_crosshair = new Crosshairs();
 
+//    TestGLContext& curr_context = wxGetApp().mainFrame->GetContext(this);
+//    GetContext(this);
+
+
     if ( attribList )
     {
         int i = 0;
@@ -99,6 +103,7 @@ TestGLCanvas::TestGLCanvas(wxWindow *parent, int *attribList)
 
 void TestGLCanvas::OnPaint(wxPaintEvent& WXUNUSED(event))
 {
+    //std::cout << "In TestGLCanvas OnPaint:" << std::endl;
     // This is required even though dc is not used otherwise.
     wxPaintDC dc(this);
 
@@ -110,7 +115,14 @@ void TestGLCanvas::OnPaint(wxPaintEvent& WXUNUSED(event))
     // is wrong when next another canvas is repainted.
     const wxSize ClientSize = GetClientSize();
 
-    TestGLContext& canvas = wxGetApp().GetContext(this);
+ //   TestGLContext& canvas = wxGetApp().GetContext(this);
+    std::cout << "1. In TestGLCanvas OnPaint:" << std::endl;
+
+//    TestGLContext& curr_context = wxGetApp().mainFrame->GetContext(this);
+
+//    TestGLContext& curr_context = GetContext(this);
+    std::cout << "2. In TestGLCanvas OnPaint:" << std::endl;
+
     glViewport(0, 0, ClientSize.x, ClientSize.y);
 
     // Render the graphics and swap the buffers.
@@ -133,12 +145,13 @@ void TestGLCanvas::OnPaint(wxPaintEvent& WXUNUSED(event))
     }
     else
     {
-        canvas.DrawRotatedCube(m_xangle, m_yangle);
-        if ( m_useStereo && !m_stereoWarningAlreadyDisplayed )
-        {
-            m_stereoWarningAlreadyDisplayed = true;
-            wxLogError("Stereo not supported by the graphics card.");
-        }
+//        curr_context.DrawRotatedCube(m_xangle, m_yangle);
+        GetContext(this).DrawRotatedCube(m_xangle, m_yangle);
+        // if ( m_useStereo && !m_stereoWarningAlreadyDisplayed )
+        // {
+        //     m_stereoWarningAlreadyDisplayed = true;
+        //     wxLogError("Stereo not supported by the graphics card.");
+        // }
     }
     SwapBuffers();
 }
@@ -230,4 +243,21 @@ void TestGLCanvas::OnMouseMove(wxMouseEvent& event)
 void TestGLCanvas::setCurrMousePos(int x, int y, int z) {
     delete m_currMousePos; 
     m_currMousePos = new Point(x,y,z);
+}
+
+TestGLContext& TestGLCanvas::GetContext(wxGLCanvas *canvas)
+{
+    //TestGLContext *glContext;
+
+    if ( !m_glContext )
+    {
+        // Create the OpenGL context for the first mono window which needs it:
+        // subsequently created windows will all share the same context.
+        m_glContext = new TestGLContext(canvas);
+    }
+
+    std::cout << "1. TestGLCanvas::GetContext" << std::endl;
+    m_glContext->SetCurrent(*canvas);
+    std::cout << "2. TestGLCanvas::GetContext" << std::endl;
+    return *m_glContext;
 }

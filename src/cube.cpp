@@ -56,37 +56,33 @@ bool MyApp::OnInit()
     if ( !wxApp::OnInit() )
         return false;
 
-    new MyFrame();
+    mainFrame = new MyFrame();
 
     return true;
 }
 
 int MyApp::OnExit()
 {
-    delete m_glContext;
+    //delete m_glContext;
 
     return wxApp::OnExit();
 }
 
-TestGLContext& MyApp::GetContext(wxGLCanvas *canvas)
-{
-    TestGLContext *glContext;
+// TestGLContext& MyFrame::GetContext(wxGLCanvas *canvas)
+// {
+//     //TestGLContext *glContext;
 
-    if ( !m_glContext )
-    {
-        // Create the OpenGL context for the first mono window which needs it:
-        // subsequently created windows will all share the same context.
-        m_glContext = new TestGLContext(canvas);
-    }
+//     if ( !m_glContext )
+//     {
+//         // Create the OpenGL context for the first mono window which needs it:
+//         // subsequently created windows will all share the same context.
+//         m_glContext = new TestGLContext(canvas);
+//     }
 
-    m_glContext->SetCurrent(*canvas);
+//     m_glContext->SetCurrent(*canvas);
 
-    return *m_glContext;
-}
-
-
-
-
+//     return *m_glContext;
+// }
 
 // ----------------------------------------------------------------------------
 // MyFrame: main application window
@@ -221,6 +217,9 @@ void MyFrame::OnClose(wxCommandEvent& WXUNUSED(event))
 {
     // true is to force the frame to close
     Close(true);
+//    delete m_glContext;
+    delete m_canvas;
+    delete m_staticlabel;
 }
 
 void IncompleteAction() {

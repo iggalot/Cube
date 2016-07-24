@@ -169,7 +169,7 @@ static wxImage DrawDice(int size, unsigned num)
 TestGLContext::TestGLContext(wxGLCanvas *canvas)
              : wxGLContext(canvas)
 {
-    orig_canvas = (TestGLCanvas*) canvas;
+    orig_canvas = (TestGLCanvas*) canvas;  // record our canvas pointer for ease of use later
     SetCurrent(*canvas);
 
     // set up the parameters we want to use
