@@ -26,7 +26,7 @@ class TestGLContext;
 class MyApp : public wxApp
 {
 public:
-    MyApp() { m_glContext = NULL; m_glStereoContext = NULL; }
+    MyApp() { m_glContext = NULL; }
 
     // Returns the shared context used by all frames and sets it as current for
     // the given canvas.
@@ -39,8 +39,6 @@ public:
 private:
     // the GL context we use for all our mono rendering windows
     TestGLContext *m_glContext;
-    // the GL context we use for all our stereo rendering windows
-    TestGLContext *m_glStereoContext;
 };
 
 // Define a new frame type

@@ -64,7 +64,6 @@ bool MyApp::OnInit()
 int MyApp::OnExit()
 {
     delete m_glContext;
-    delete m_glStereoContext;
 
     return wxApp::OnExit();
 }
@@ -72,30 +71,17 @@ int MyApp::OnExit()
 TestGLContext& MyApp::GetContext(wxGLCanvas *canvas)
 {
     TestGLContext *glContext;
-    // if ( useStereo )
-    // {
-    //     if ( !m_glStereoContext )
-    //     {
-    //         // Create the OpenGL context for the first stereo window which needs it:
-    //         // subsequently created windows will all share the same context.
-    //         m_glStereoContext = new TestGLContext(canvas);
-    //     }
-    //     glContext = m_glStereoContext;
-    // }
-    // else
-    // {
-        if ( !m_glContext )
-        {
-            // Create the OpenGL context for the first mono window which needs it:
-            // subsequently created windows will all share the same context.
-            m_glContext = new TestGLContext(canvas);
-        }
-        glContext = m_glContext;
-    // }
 
-    glContext->SetCurrent(*canvas);
+    if ( !m_glContext )
+    {
+        // Create the OpenGL context for the first mono window which needs it:
+        // subsequently created windows will all share the same context.
+        m_glContext = new TestGLContext(canvas);
+    }
 
-    return *glContext;
+    m_glContext->SetCurrent(*canvas);
+
+    return *m_glContext;
 }
 
 
@@ -127,7 +113,6 @@ MyFrame::MyFrame( bool stereoWindow )
     int stereoAttribList[] = { WX_GL_RGBA, WX_GL_DOUBLEBUFFER, WX_GL_STEREO, 0 };
 
     m_canvas = new TestGLCanvas(this, NULL);
- //  m_canvas = new TestGLCanvas(this, stereoWindow ? stereoAttribList : NULL);
     m_staticlabel = new wxStaticText( this, wxID_ANY, "Example", 
         wxDefaultPosition, wxDefaultSize, wxALIGN_LEFT);
 

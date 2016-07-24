@@ -26,6 +26,7 @@ class TestGLContext : public wxGLContext
 {
 public:
     TestGLContext(wxGLCanvas *canvas);
+    
 
     // render the cube showing it at given angles
     void DrawRotatedCube(float xangle, float yangle);

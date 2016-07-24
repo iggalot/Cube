@@ -34,6 +34,7 @@ public:
     // methods
     virtual void AddVertex() = 0;
     virtual void Render(TestGLCanvas* canvas) = 0;
+    virtual void CreateProgram() = 0;
 
 private:
     VertexData* vertices;
@@ -54,6 +55,7 @@ public:
 
     void Render(TestGLCanvas* canvas);
     void AddVertex();
+    void CreateProgram();
 };
 
 #endif // _DRAWOBJECT_H

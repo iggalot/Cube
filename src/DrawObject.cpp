@@ -31,6 +31,7 @@
 #include "../include/Geometry.h"
 #include "../include/TestGLCanvas.h"
 #include "../include/DrawObject.h"
+#include "../include/Shader.h"
 
 const GLchar* myvertexShaderSource = "#version 300 es\n"
     "layout (location = 0) in vec3 position;\n"
@@ -69,6 +70,7 @@ DrawObject::DrawObject(){
 // default constructor
 Crosshairs::Crosshairs(){
 	std::cout << "Crosshair constructor" << std::endl;
+ //   Shader *myShader = new Shader(myvertexShaderSource, myfragmentShaderSource);
 }
 
 void Crosshairs::Render(TestGLCanvas *orig_canvas)
@@ -173,5 +175,9 @@ void Crosshairs::Render(TestGLCanvas *orig_canvas)
 
 void Crosshairs::AddVertex(){
 	std::cout << "Add vertex for crosshair" << std::endl;
+}
+
+void Crosshairs::CreateProgram(){
+    std::cout << "In Crosshairs Create Program: "  << std::endl;
 }
 
