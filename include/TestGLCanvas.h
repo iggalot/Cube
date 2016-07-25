@@ -7,6 +7,7 @@
 #ifndef _TESTGLCANVAS_H_
 #define _TESTGLCANVAS_H_
 
+#include <vector>
 #include "wx/glcanvas.h"
 
 // forward declaration
@@ -23,6 +24,7 @@ public:
     static const int CANVAS_HEIGHT = 600;
 
     TestGLCanvas(wxWindow *parent, int *attribList = NULL);
+    ~TestGLCanvas(); // destructor
 
     // methods
     GLuint getCurrentDrawNum() {return m_current_drawnum;}
@@ -33,8 +35,13 @@ public:
     // the given canvas.
     TestGLContext& GetContext(wxGLCanvas *canvas);
 
+    void CreateDrawObj();  // creates our drafting aids (crosshairs, grid, etc.)
+
+
     DrawObject* m_crosshair;
     TestGLContext* m_glContext;
+        std::vector<DrawObject*> drawObjects;
+
 private:
 
     GLuint m_current_drawnum;

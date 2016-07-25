@@ -34,7 +34,7 @@ public:
     // methods
     virtual void AddVertex() = 0;
     virtual void Render(TestGLCanvas* canvas) = 0;
-    virtual void CreateProgram() = 0;
+    virtual void CreateShaderProgram() = 0;
 
 private:
     VertexData* vertices;
@@ -51,11 +51,30 @@ private:
 class Crosshairs : public DrawObject
 {
 public:
-    Crosshairs();
+    Crosshairs(TestGLCanvas *canvas);
 
     void Render(TestGLCanvas* canvas);
     void AddVertex();
-    void CreateProgram();
+    void CreateShaderProgram();
+};
+
+class Dice : public DrawObject
+{
+public:
+    Dice(TestGLCanvas *canvas);
+
+    void Render(TestGLCanvas* canvas);
+    void AddVertex();
+    void CreateShaderProgram();
+};
+
+class Triangle : public DrawObject{
+public:
+    Triangle(TestGLCanvas *canvas);
+
+    void Render(TestGLCanvas* canvas);
+    void AddVertex();
+    void CreateShaderProgram();
 };
 
 #endif // _DRAWOBJECT_H

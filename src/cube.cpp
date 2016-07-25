@@ -43,6 +43,7 @@
 #include "../include/DrawMenuDialog.h"
 #include "../include/TestGLContext.h"
 #include "../include/TestGLCanvas.h"
+#include "../include/DrawObject.h"
 
 
 // ----------------------------------------------------------------------------
@@ -191,6 +192,13 @@ MyFrame::MyFrame( bool stereoWindow )
     //     if ( vendor.find("nvidia") != wxString::npos &&
     //             renderer.find("quadro") == wxString::npos )
     //         ShowFullScreen(true);
+    // }
+
+    m_canvas->CreateDrawObj();
+
+    // if(m_canvas->m_crosshair == NULL) {
+    //     m_canvas->GetContext(m_canvas);
+    //     m_canvas->m_crosshair = new Crosshairs(m_canvas);
     // }
 
     Connect(wxID_NEW, wxEVT_COMMAND_MENU_SELECTED,

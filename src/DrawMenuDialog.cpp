@@ -63,7 +63,7 @@ DrawMenuDialog::DrawMenuDialog(const DrawMenuDialog &source) {
 
 // destructor
 DrawMenuDialog::~DrawMenuDialog() {
-  std::cout << "Destrying DrawMenuDialog" << std::cout;
+  std::cout << "Destroying DrawMenuDialog" << std::endl;
   Destroy();
 }
 

@@ -66,13 +66,15 @@ TestGLCanvas::TestGLCanvas(wxWindow *parent, int *attribList)
                  wxFULL_REPAINT_ON_RESIZE),
       m_xangle(30.0),
       m_yangle(30.0),
-      m_spinTimer(this,SpinTimer),
-      m_useStereo(false),
-      m_stereoWarningAlreadyDisplayed(false)
+      m_spinTimer(this,SpinTimer)
+ //     m_useStereo(false),
+//      m_stereoWarningAlreadyDisplayed(false)
 {
+    m_glContext = NULL;
     m_current_drawnum = 0;
     m_currMousePos = new Point();
-    m_crosshair = new Crosshairs();
+    m_crosshair = NULL;
+//    m_crosshair = new Crosshairs(this);
 
 //    TestGLContext& curr_context = wxGetApp().mainFrame->GetContext(this);
 //    GetContext(this);
@@ -98,7 +100,32 @@ TestGLCanvas::TestGLCanvas(wxWindow *parent, int *attribList)
     // this should get the frame that is the parent of the canvas.  Must case it
     // to (MyFrame*) because the default GetParent() returns a wxWindow which
     // MyFrame is also derived from.
-    myParentFrame = (MyFrame *) this->GetParent();  
+    myParentFrame = (MyFrame *) this->GetParent(); 
+
+
+    glewExperimental = GL_TRUE;
+    GLenum err = glewInit();
+//    std::cout << "glewInit() call: " << glewInit() << std::endl;
+ if(err != GLEW_OK) {
+        std::cout << "Error #: " << glGetError() << " str: " << glewGetErrorString(err) << std::endl;;
+
+        std::cout << "GLEW_OK: " << GLEW_OK << std::endl;
+
+        std::cout << "GL_NO_ERROR: " << GL_NO_ERROR << std::endl;
+        std::cout << "GL_INVALID_ENUM: " << GL_INVALID_ENUM << std::endl;
+        std::cout << "GL_INVALID_VALUE: " << GL_INVALID_VALUE << std::endl;
+        std::cout << "GL_OUT_OF_MEMORY: " << GL_OUT_OF_MEMORY << std::endl;
+        std::cout << "GL_STACK_UNDERFLOW: " << GL_STACK_UNDERFLOW << std::endl;
+        std::cout << "GL_STACK_OVERFLOW: " << GL_STACK_OVERFLOW << std::endl;       
+    } else
+        std::cout << "GlewInit() okay" << std::endl; 
+}
+
+TestGLCanvas::~TestGLCanvas() {
+    std::cout<< "In TestGLCanvas destructor" << std::endl;
+    delete m_crosshair;
+    delete m_glContext;
+    delete m_currMousePos;
 }
 
 void TestGLCanvas::OnPaint(wxPaintEvent& WXUNUSED(event))
@@ -116,12 +143,11 @@ void TestGLCanvas::OnPaint(wxPaintEvent& WXUNUSED(event))
     const wxSize ClientSize = GetClientSize();
 
  //   TestGLContext& canvas = wxGetApp().GetContext(this);
-    std::cout << "1. In TestGLCanvas OnPaint:" << std::endl;
+ //   std::cout << "1. In TestGLCanvas OnPaint:" << std::endl;
 
 //    TestGLContext& curr_context = wxGetApp().mainFrame->GetContext(this);
-
 //    TestGLContext& curr_context = GetContext(this);
-    std::cout << "2. In TestGLCanvas OnPaint:" << std::endl;
+//    std::cout << "2. In TestGLCanvas OnPaint:" << std::endl;
 
     glViewport(0, 0, ClientSize.x, ClientSize.y);
 
@@ -145,13 +171,31 @@ void TestGLCanvas::OnPaint(wxPaintEvent& WXUNUSED(event))
     }
     else
     {
+        // if(m_crosshair == NULL) {
+        //     GetContext(this);
+        //     m_crosshair = new Crosshairs(this);
+        // }
+
 //        curr_context.DrawRotatedCube(m_xangle, m_yangle);
-        GetContext(this).DrawRotatedCube(m_xangle, m_yangle);
+        glClearColor(0.5f, 0.5f, 0.65f, 0.0);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        for(auto &drawobj : this->drawObjects ) {
+            drawobj->Render(this);
+        }
+        //This line will reinstall the spinning cube and the basic triangle, in lieu of
+        // the more general drawing object inheritance object
+//        GetContext(this).DrawRotatedCube(m_xangle, m_yangle);
+
+
         // if ( m_useStereo && !m_stereoWarningAlreadyDisplayed )
         // {
         //     m_stereoWarningAlreadyDisplayed = true;
         //     wxLogError("Stereo not supported by the graphics card.");
         // }
+        glFlush();
+
+        //CheckGLError();
     }
     SwapBuffers();
 }
@@ -248,7 +292,7 @@ void TestGLCanvas::setCurrMousePos(int x, int y, int z) {
 TestGLContext& TestGLCanvas::GetContext(wxGLCanvas *canvas)
 {
     //TestGLContext *glContext;
-
+    //std::cout << "m_glContext: " << m_glContext << std::endl;
     if ( !m_glContext )
     {
         // Create the OpenGL context for the first mono window which needs it:
@@ -256,8 +300,27 @@ TestGLContext& TestGLCanvas::GetContext(wxGLCanvas *canvas)
         m_glContext = new TestGLContext(canvas);
     }
 
-    std::cout << "1. TestGLCanvas::GetContext" << std::endl;
+//    std::cout << "1. TestGLCanvas::GetContext" << std::endl;
     m_glContext->SetCurrent(*canvas);
-    std::cout << "2. TestGLCanvas::GetContext" << std::endl;
+//   std::cout << "2. TestGLCanvas::GetContext" << std::endl;
     return *m_glContext;
+}
+
+void TestGLCanvas::CreateDrawObj() {
+
+    std::cout << "In TestGLCanvas CreateDrawObj" << std::endl;
+    GetContext(this);
+
+     //   DrawObject *dice = new Dice(this);
+    drawObjects.push_back(new Dice(this));
+    drawObjects.push_back(new Triangle(this));
+
+    if(m_crosshair == NULL) {
+        m_crosshair = new Crosshairs(this);
+        drawObjects.push_back(m_crosshair);
+    }
+
+    // Add a drawing item to our list to test (this is the dice from the TestGLContext)
+
+
 }

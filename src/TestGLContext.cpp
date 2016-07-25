@@ -170,7 +170,9 @@ TestGLContext::TestGLContext(wxGLCanvas *canvas)
              : wxGLContext(canvas)
 {
     orig_canvas = (TestGLCanvas*) canvas;  // record our canvas pointer for ease of use later
-    SetCurrent(*canvas);
+
+
+//    SetCurrent(*canvas);
 
     // set up the parameters we want to use
     glEnable(GL_CULL_FACE);
@@ -284,9 +286,10 @@ void TestGLContext::DoDrawCubeTwo(float xangle, float yangle) {
     glClearColor(0.65f, 0.25f, 0.25f, 0.0);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     // Set this to true so GLEW knows to use a modern approach to retrieving function pointers and extensions
-    glewExperimental = GL_TRUE;
+ 
     // Initialize GLEW to setup the OpenGL Function pointers
-    glewInit();
+ //   glewExperimental = GL_TRUE;
+ //   glewInit();
 
     //std::cout << "Drawing cube 2" << std::endl;
 
@@ -470,13 +473,19 @@ void TestGLContext::DoDrawCubeTwo(float xangle, float yangle) {
 
 void TestGLContext::DrawRotatedCube(float xangle, float yangle)
 {
-    if(orig_canvas->getCurrentDrawNum() == 0) {
-        DoDrawCubeOne(xangle, yangle);
-    } else {
-        DoDrawCubeTwo(xangle, yangle);
-    }
+    glClearColor(0.65f, 0.65f, 0.65f, 0.0);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    orig_canvas->m_crosshair->Render(orig_canvas);
+    // if(orig_canvas->getCurrentDrawNum() == 0) {
+    //     DoDrawCubeOne(xangle, yangle);
+    // } else {
+    //     DoDrawCubeTwo(xangle, yangle);
+    // }
+
+    // for(auto &drawobj : orig_canvas->drawObjects ) {
+    //     drawobj->Render(orig_canvas);
+    // }
+//    orig_canvas->m_crosshair->Render(orig_canvas);
     //DrawCrosshairs();
 
     glFlush();
