@@ -38,9 +38,10 @@ public:
     void CreateDrawObj();  // creates our drafting aids (crosshairs, grid, etc.)
 
 
+    DrawObject* m_gridlines;
     DrawObject* m_crosshair;
     TestGLContext* m_glContext;
-        std::vector<DrawObject*> drawObjects;
+    std::vector<DrawObject*> drawObjects;
 
 private:
 

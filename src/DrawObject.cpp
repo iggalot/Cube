@@ -46,11 +46,6 @@ const GLchar* myfragmentShaderSource = "#version 300 es\n"
     "color = vec4(1.0f, 0.5f, 0.2f, 1.0f);\n"
     "}\n\0";
 
-
-
-
-
-
 // default constructor
 VertexData::VertexData() {
 	VertexData(0.0f, 0.0f, 0.0f);
@@ -66,6 +61,10 @@ VertexData::VertexData(GLfloat x_pt, GLfloat y_pt, GLfloat z_pt){
 DrawObject::DrawObject(){
 	std::cout << "DrawObject constructor" << std::endl;
 }
+
+/////////////////////////////////////////////////////////////////////////
+//  Crosshair drawing aid object
+/////////////////////////////////////////////////////////////////////////
 
 // default constructor
 Crosshairs::Crosshairs(TestGLCanvas *canvas){
@@ -351,35 +350,220 @@ void Triangle::Render(TestGLCanvas *orig_canvas) {
     glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &VBO);
 
-
-
-
-
-
-
-
 }
-
-
-
-
-
-
-
 
 Triangle::Triangle(TestGLCanvas *canvas){
     std::cout << "Triangle constructor" << std::endl;
 }
-
-
-
-
 
 void Triangle::AddVertex(){
     std::cout << "Add vertex for dice" << std::endl;
 }
 
 void Triangle::CreateShaderProgram(){
-    std::cout << "In dice Create Program: "  << std::endl;
+    std::cout << "In triangle Create Shader Program: "  << std::endl;
 }
 
+//////////////////////////////////////////////////////////////////////
+//  Gridline drawing aid routines
+//////////////////////////////////////////////////////////////////////
+Gridlines::Gridlines(TestGLCanvas *canvas, GLfloat x, GLfloat y, GLfloat z){
+    std::cout << "Gridlines constructor" << std::endl;
+
+    // x_spa = 0.10f;
+    // y_spa = 0.20f;
+    // z_spa = 0.10f;
+
+   x_spa = x;
+   y_spa = y;
+   z_spa = z;
+
+    Shader *myShader = new Shader(myvertexShaderSource, myfragmentShaderSource);
+    std::cout << "Gridlines constructor" << std::endl;
+
+    // for centermost gridlines
+    vertices.push_back(-1.0f);
+    vertices.push_back(0.0f);
+    vertices.push_back(0.0f);
+
+    vertices.push_back(1.0f);
+    vertices.push_back(0.0f);
+    vertices.push_back(0.0f);
+
+    vertices.push_back(0.0f);
+    vertices.push_back(1.0f);
+    vertices.push_back(0.0f);
+
+    vertices.push_back(0.0f);
+    vertices.push_back(-1.0f);
+    vertices.push_back(0.0f);
+
+    // for all other horiz lines
+    for(int i = 1; i < 1.0 / y_spa; i++) {
+        GLfloat top = 0.0f + (i * y_spa);
+
+        // horiz line
+        vertices.push_back(-1.0f);
+        vertices.push_back(top);
+        vertices.push_back(0.0f);
+
+        vertices.push_back(1.0f);
+        vertices.push_back(top);
+        vertices.push_back(0.0f);
+
+        vertices.push_back(-1.0f);
+        vertices.push_back(-top);
+        vertices.push_back(0.0f);
+
+        vertices.push_back(1.0f);
+        vertices.push_back(-top);
+        vertices.push_back(0.0f);
+    }
+
+    // for all other vert lines
+    for(int i = 1; i < 1.0 / x_spa; i++) {
+
+        GLfloat left = 0.0f + (i * x_spa);
+
+        // vert line
+        vertices.push_back(left);
+        vertices.push_back(1.0f);
+        vertices.push_back(0.0f);
+
+        vertices.push_back(left);
+        vertices.push_back(-1.0f);
+        vertices.push_back(0.0f);
+
+        vertices.push_back(-left);
+        vertices.push_back(1.0f);
+        vertices.push_back(0.0f);
+
+        vertices.push_back(-left);
+        vertices.push_back(-1.0f);
+        vertices.push_back(0.0f);
+
+    }
+
+    // displayVertices();
+    // int num_verts = vertices.size() / 3;
+    // std::cout << "Vertices.size(): " << vertices.size() << std::endl;
+    // std::cout << "Number of vertices: " << num_verts << std::endl;
+}
+
+// copy constructor
+Gridlines::Gridlines(const Gridlines &source){
+    for(int i=0; i<source.vertices.size(); i++) {
+        vertices.push_back(source.vertices[i]);
+    }
+     x_spa = source.x_spa;
+     y_spa = source.y_spa;
+     z_spa = source.z_spa;
+}
+
+void Gridlines::Render(TestGLCanvas *orig_canvas)
+{
+    // Build and compile our shader program
+    // Vertex shader
+    GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
+    glShaderSource(vertexShader, 1, &myvertexShaderSource, NULL);
+    glCompileShader(vertexShader);
+    // Check for compile time errors
+    GLint success;
+    GLchar infoLog[512];
+    glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
+    if (!success)
+    {
+        glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
+        std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" << infoLog << std::endl;
+    }
+    // Fragment shader
+    GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+    glShaderSource(fragmentShader, 1, &myfragmentShaderSource, NULL);
+    glCompileShader(fragmentShader);
+    // Check for compile time errors
+    glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
+    if (!success)
+    {
+        glGetShaderInfoLog(fragmentShader, 512, NULL, infoLog);
+        std::cout << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n" << infoLog << std::endl;
+    }
+    // Link shaders
+    GLuint shaderProgram = glCreateProgram();
+    glAttachShader(shaderProgram, vertexShader);
+    glAttachShader(shaderProgram, fragmentShader);
+    glLinkProgram(shaderProgram);
+    // Check for linking errors
+    glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
+    if (!success) {
+        glGetProgramInfoLog(shaderProgram, 512, NULL, infoLog);
+        std::cout << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n" << infoLog << std::endl;
+    }
+    glDeleteShader(vertexShader);
+    glDeleteShader(fragmentShader);
+
+
+    int num_verts = vertices.size() / 3;
+    // std::cout << "Vertices.size(): " << vertices.size() << std::endl;
+    // std::cout << "Number of vertices: " << num_verts << std::endl;
+    // displayVertices();
+    
+    // std::cout << curr_x << " , " << curr_y << std::endl;
+    // std::cout << num_verts << std::endl;
+
+    GLuint VBO, VAO;
+    glGenVertexArrays(1, &VAO);
+    glGenBuffers(1, &VBO);
+    // Bind the Vertex Array Object first, then bind and set vertex buffer(s) and attribute pointer(s).
+    glBindVertexArray(VAO);
+
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(GLfloat), &vertices[0], GL_STATIC_DRAW);
+
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
+//    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, vertices.size() / num_verts, (GLvoid*)0);
+    glEnableVertexAttribArray(0);
+
+    glBindBuffer(GL_ARRAY_BUFFER, 0); // Note that this is allowed, the call to glVertexAttribPointer registered VBO as the currently bound vertex buffer object so afterwards we can safely unbind
+
+    glBindVertexArray(0); // Unbind VAO (it's always a good thing to unbind any buffer/array to prevent strange bugs)
+
+    // Check if any events have been activiated (key pressed, mouse moved etc.) and call corresponding response functions
+    glfwPollEvents();
+
+    // Render
+
+    // Draw our first triangle
+    glUseProgram(shaderProgram);
+    glBindVertexArray(VAO);
+    glDrawArrays(GL_LINES, 0, num_verts);
+ //   glDrawArrays(GL_LINES, 0, 2);
+    glBindVertexArray(0);
+
+    // Properly de-allocate all resources once they've outlived their purpose
+    glUseProgram(0); // stop using a shader program
+    glDeleteVertexArrays(1, &VAO);
+    glDeleteBuffers(1, &VBO);
+}
+
+void Gridlines::displayVertices(){
+    int i = 1;
+    for (const auto &coord : vertices) {
+        std::cout << coord;
+
+        if(i==3) {
+            std::cout << std::endl;
+            i=1;
+        } else {
+            std::cout << " , ";
+            i++;
+        }
+    }
+}
+
+void Gridlines::AddVertex(){
+    std::cout << "Add vertex for gridlines" << std::endl;
+}
+
+void Gridlines::CreateShaderProgram(){
+    std::cout << "In gridlines Create Shader Program: "  << std::endl;
+}

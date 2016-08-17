@@ -74,6 +74,7 @@ TestGLCanvas::TestGLCanvas(wxWindow *parent, int *attribList)
     m_current_drawnum = 0;
     m_currMousePos = new Point();
     m_crosshair = NULL;
+    m_gridlines = NULL;
 //    m_crosshair = new Crosshairs(this);
 
 //    TestGLContext& curr_context = wxGetApp().mainFrame->GetContext(this);
@@ -123,6 +124,7 @@ TestGLCanvas::TestGLCanvas(wxWindow *parent, int *attribList)
 
 TestGLCanvas::~TestGLCanvas() {
     std::cout<< "In TestGLCanvas destructor" << std::endl;
+    delete m_gridlines;
     delete m_crosshair;
     delete m_glContext;
     delete m_currMousePos;
@@ -131,6 +133,7 @@ TestGLCanvas::~TestGLCanvas() {
 void TestGLCanvas::OnPaint(wxPaintEvent& WXUNUSED(event))
 {
     //std::cout << "In TestGLCanvas OnPaint:" << std::endl;
+
     // This is required even though dc is not used otherwise.
     wxPaintDC dc(this);
 
@@ -152,25 +155,25 @@ void TestGLCanvas::OnPaint(wxPaintEvent& WXUNUSED(event))
     glViewport(0, 0, ClientSize.x, ClientSize.y);
 
     // Render the graphics and swap the buffers.
-    GLboolean quadStereoSupported;
-    glGetBooleanv( GL_STEREO, &quadStereoSupported);
-    if ( quadStereoSupported )
-    {
-        // glDrawBuffer( GL_BACK_LEFT );
-        // glMatrixMode(GL_PROJECTION);
-        // glLoadIdentity();
-        // glFrustum(-0.47f, 0.53f, -0.5f, 0.5f, 1.0f, 3.0f);
-        // canvas.DrawRotatedCube(m_xangle, m_yangle);
-        // CheckGLError();
-        // glDrawBuffer( GL_BACK_RIGHT );
-        // glMatrixMode(GL_PROJECTION);
-        // glLoadIdentity();
-        // glFrustum(-0.53f, 0.47f, -0.5f, 0.5f, 1.0f, 3.0f);
-        // canvas.DrawRotatedCube(m_xangle, m_yangle);
-        // CheckGLError();
-    }
-    else
-    {
+    // GLboolean quadStereoSupported;
+    // glGetBooleanv( GL_STEREO, &quadStereoSupported);
+    // if ( quadStereoSupported )
+    // {
+    //     // glDrawBuffer( GL_BACK_LEFT );
+    //     // glMatrixMode(GL_PROJECTION);
+    //     // glLoadIdentity();
+    //     // glFrustum(-0.47f, 0.53f, -0.5f, 0.5f, 1.0f, 3.0f);
+    //     // canvas.DrawRotatedCube(m_xangle, m_yangle);
+    //     // CheckGLError();
+    //     // glDrawBuffer( GL_BACK_RIGHT );
+    //     // glMatrixMode(GL_PROJECTION);
+    //     // glLoadIdentity();
+    //     // glFrustum(-0.53f, 0.47f, -0.5f, 0.5f, 1.0f, 3.0f);
+    //     // canvas.DrawRotatedCube(m_xangle, m_yangle);
+    //     // CheckGLError();
+    // }
+    // else
+    // {
         // if(m_crosshair == NULL) {
         //     GetContext(this);
         //     m_crosshair = new Crosshairs(this);
@@ -196,7 +199,7 @@ void TestGLCanvas::OnPaint(wxPaintEvent& WXUNUSED(event))
         glFlush();
 
         //CheckGLError();
-    }
+//    }
     SwapBuffers();
 }
 
@@ -315,9 +318,16 @@ void TestGLCanvas::CreateDrawObj() {
     drawObjects.push_back(new Dice(this));
     drawObjects.push_back(new Triangle(this));
 
+    // create our crosshairs
     if(m_crosshair == NULL) {
         m_crosshair = new Crosshairs(this);
         drawObjects.push_back(m_crosshair);
+    }
+
+    // create our gridlines
+    if(m_gridlines == NULL) {
+        m_gridlines = new Gridlines(this, 0.25f, 0.10f, 0.10f);;
+        drawObjects.push_back(m_gridlines);
     }
 
     // Add a drawing item to our list to test (this is the dice from the TestGLContext)

@@ -77,4 +77,25 @@ public:
     void CreateShaderProgram();
 };
 
+class Gridlines : public DrawObject{
+public:
+    //Gridlines(TestGLCanvas *canvas);
+    Gridlines(TestGLCanvas *canvas, GLfloat x, GLfloat y, GLfloat z);
+
+    // copy constructor
+    Gridlines(const Gridlines &source);
+
+    void Render(TestGLCanvas* canvas);
+    void AddVertex();
+    void CreateShaderProgram();
+
+    void displayVertices();
+
+private:
+    std::vector<GLfloat> vertices;
+    GLfloat x_spa;
+    GLfloat y_spa;
+    GLfloat z_spa;
+};
+
 #endif // _DRAWOBJECT_H
