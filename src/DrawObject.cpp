@@ -33,18 +33,18 @@
 #include "../include/DrawObject.h"
 #include "../include/Shader.h"
 
-const GLchar* myvertexShaderSource = "#version 300 es\n"
-    "layout (location = 0) in vec3 position;\n"
-    "void main()\n"
-    "{\n"
-    "gl_Position = vec4(position.x, position.y, position.z, 1.0);\n"
-    "}\0";
-const GLchar* myfragmentShaderSource = "#version 300 es\n"
-    "out highp vec4 color;\n"
-    "void main()\n"
-    "{\n"
-    "color = vec4(1.0f, 0.5f, 0.2f, 1.0f);\n"
-    "}\n\0";
+// const GLchar* myvertexShaderSource = "#version 300 es\n"
+//     "layout (location = 0) in vec3 position;\n"
+//     "void main()\n"
+//     "{\n"
+//     "gl_Position = vec4(position.x, position.y, position.z, 1.0);\n"
+//     "}\0";
+// const GLchar* myfragmentShaderSource = "#version 300 es\n"
+//     "out highp vec4 color;\n"
+//     "void main()\n"
+//     "{\n"
+//     "color = vec4(1.0f, 0.5f, 0.2f, 1.0f);\n"
+//     "}\n\0";
 
 // default constructor
 VertexData::VertexData() {
@@ -60,6 +60,7 @@ VertexData::VertexData(GLfloat x_pt, GLfloat y_pt, GLfloat z_pt){
 // default constructor
 DrawObject::DrawObject(){
 	std::cout << "DrawObject constructor" << std::endl;
+    shader = NULL;
 }
 
 /////////////////////////////////////////////////////////////////////////
@@ -68,61 +69,14 @@ DrawObject::DrawObject(){
 
 // default constructor
 Crosshairs::Crosshairs(TestGLCanvas *canvas){
-        std::cout << "1. Crosshair constructor" << std::endl;
-//    glewInit();
-        std::cout << "2. Crosshair constructor" << std::endl;
-//    canvas->GetContext(canvas);
-	std::cout << "3. Crosshair constructor" << std::endl;
-    Shader *myShader = new Shader(myvertexShaderSource, myfragmentShaderSource);
-        std::cout << "4. Crosshair constructor" << std::endl;
+        std::cout << "Crosshair constructor" << std::endl;
+
+//    setShader(new Shader(myvertexShaderSource, myfragmentShaderSource));
+    setShader(new Shader());
 }
 
 void Crosshairs::Render(TestGLCanvas *orig_canvas)
 {
-	//std::cout << "Render crosshair now" << std::endl;
-//	    glewInit();
-    
-    //std::cout << "Drawing crosshairs" << std::endl;
-
-    // Build and compile our shader program
-    // Vertex shader
-    GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(vertexShader, 1, &myvertexShaderSource, NULL);
-    glCompileShader(vertexShader);
-    // Check for compile time errors
-    GLint success;
-    GLchar infoLog[512];
-    glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
-    if (!success)
-    {
-        glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
-        std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" << infoLog << std::endl;
-    }
-    // Fragment shader
-    GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(fragmentShader, 1, &myfragmentShaderSource, NULL);
-    glCompileShader(fragmentShader);
-    // Check for compile time errors
-    glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
-    if (!success)
-    {
-        glGetShaderInfoLog(fragmentShader, 512, NULL, infoLog);
-        std::cout << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n" << infoLog << std::endl;
-    }
-    // Link shaders
-    GLuint shaderProgram = glCreateProgram();
-    glAttachShader(shaderProgram, vertexShader);
-    glAttachShader(shaderProgram, fragmentShader);
-    glLinkProgram(shaderProgram);
-    // Check for linking errors
-    glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
-    if (!success) {
-        glGetProgramInfoLog(shaderProgram, 512, NULL, infoLog);
-        std::cout << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n" << infoLog << std::endl;
-    }
-    glDeleteShader(vertexShader);
-    glDeleteShader(fragmentShader);
-
     int ht = orig_canvas->CANVAS_HEIGHT;
     int width = orig_canvas->CANVAS_WIDTH;
     int curr_x = orig_canvas->getCurrMousePos()->getX();
@@ -164,9 +118,8 @@ void Crosshairs::Render(TestGLCanvas *orig_canvas)
     glfwPollEvents();
 
     // Render
-
-    // Draw our first triangle
-    glUseProgram(shaderProgram);
+    glUseProgram(getShader()->getShaderProgNum());
+ //   glUseProgram(shaderProgram);
     glBindVertexArray(VAO);
     glDrawArrays(GL_LINES, 0, num_verts);
     glBindVertexArray(0);
@@ -189,6 +142,8 @@ void Crosshairs::CreateShaderProgram(){
 
 Dice::Dice(TestGLCanvas *canvas){
     std::cout << "Dice constructor" << std::endl;
+//    setShader(new Shader(myvertexShaderSource, myfragmentShaderSource));
+    setShader(new Shader());
 }
 
 
@@ -270,47 +225,8 @@ void Dice::CreateShaderProgram(){
 }
 
 
-
-
-
-
+// Our basic triangle shape
 void Triangle::Render(TestGLCanvas *orig_canvas) {
-    GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(vertexShader, 1, &myvertexShaderSource, NULL);
-    glCompileShader(vertexShader);
-    // Check for compile time errors
-    GLint success;
-    GLchar infoLog[512];
-    glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
-    if (!success)
-    {
-        glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
-        std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" << infoLog << std::endl;
-    }
-    // Fragment shader
-    GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(fragmentShader, 1, &myfragmentShaderSource, NULL);
-    glCompileShader(fragmentShader);
-    // Check for compile time errors
-    glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
-    if (!success)
-    {
-        glGetShaderInfoLog(fragmentShader, 512, NULL, infoLog);
-        std::cout << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n" << infoLog << std::endl;
-    }
-    // Link shaders
-    GLuint shaderProgram = glCreateProgram();
-    glAttachShader(shaderProgram, vertexShader);
-    glAttachShader(shaderProgram, fragmentShader);
-    glLinkProgram(shaderProgram);
-    // Check for linking errors
-    glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
-    if (!success) {
-        glGetProgramInfoLog(shaderProgram, 512, NULL, infoLog);
-        std::cout << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n" << infoLog << std::endl;
-    }
-    glDeleteShader(vertexShader);
-    glDeleteShader(fragmentShader);
 
     // Set up vertex data (and buffer(s)) and attribute pointers
     GLfloat vertices[] = {
@@ -340,7 +256,8 @@ void Triangle::Render(TestGLCanvas *orig_canvas) {
     // Render
 
     // Draw our first triangle
-    glUseProgram(shaderProgram);
+//    glUseProgram(shaderProgram);
+    glUseProgram(getShader()->getShaderProgNum());
     glBindVertexArray(VAO);
     glDrawArrays(GL_TRIANGLES, 0, 3);
     glBindVertexArray(0);
@@ -354,6 +271,8 @@ void Triangle::Render(TestGLCanvas *orig_canvas) {
 
 Triangle::Triangle(TestGLCanvas *canvas){
     std::cout << "Triangle constructor" << std::endl;
+//    setShader(new Shader(myvertexShaderSource, myfragmentShaderSource));
+    setShader(new Shader());
 }
 
 void Triangle::AddVertex(){
@@ -374,12 +293,12 @@ Gridlines::Gridlines(TestGLCanvas *canvas, GLfloat x, GLfloat y, GLfloat z){
     // y_spa = 0.20f;
     // z_spa = 0.10f;
 
-   x_spa = x;
-   y_spa = y;
-   z_spa = z;
+    x_spa = x;
+    y_spa = y;
+    z_spa = z;
 
-    Shader *myShader = new Shader(myvertexShaderSource, myfragmentShaderSource);
-    std::cout << "Gridlines constructor" << std::endl;
+    //setShader(new Shader(myvertexShaderSource, myfragmentShaderSource));
+    setShader(new Shader("shaders/test.vert","shaders/test.frag"));
 
     // for centermost gridlines
     vertices.push_back(-1.0f);
@@ -462,46 +381,6 @@ Gridlines::Gridlines(const Gridlines &source){
 
 void Gridlines::Render(TestGLCanvas *orig_canvas)
 {
-    // Build and compile our shader program
-    // Vertex shader
-    GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(vertexShader, 1, &myvertexShaderSource, NULL);
-    glCompileShader(vertexShader);
-    // Check for compile time errors
-    GLint success;
-    GLchar infoLog[512];
-    glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
-    if (!success)
-    {
-        glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
-        std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" << infoLog << std::endl;
-    }
-    // Fragment shader
-    GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(fragmentShader, 1, &myfragmentShaderSource, NULL);
-    glCompileShader(fragmentShader);
-    // Check for compile time errors
-    glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
-    if (!success)
-    {
-        glGetShaderInfoLog(fragmentShader, 512, NULL, infoLog);
-        std::cout << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n" << infoLog << std::endl;
-    }
-    // Link shaders
-    GLuint shaderProgram = glCreateProgram();
-    glAttachShader(shaderProgram, vertexShader);
-    glAttachShader(shaderProgram, fragmentShader);
-    glLinkProgram(shaderProgram);
-    // Check for linking errors
-    glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
-    if (!success) {
-        glGetProgramInfoLog(shaderProgram, 512, NULL, infoLog);
-        std::cout << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n" << infoLog << std::endl;
-    }
-    glDeleteShader(vertexShader);
-    glDeleteShader(fragmentShader);
-
-
     int num_verts = vertices.size() / 3;
     // std::cout << "Vertices.size(): " << vertices.size() << std::endl;
     // std::cout << "Number of vertices: " << num_verts << std::endl;
@@ -533,7 +412,8 @@ void Gridlines::Render(TestGLCanvas *orig_canvas)
     // Render
 
     // Draw our first triangle
-    glUseProgram(shaderProgram);
+    glUseProgram(getShader()->getShaderProgNum());
+//    glUseProgram(shaderProgram);
     glBindVertexArray(VAO);
     glDrawArrays(GL_LINES, 0, num_verts);
  //   glDrawArrays(GL_LINES, 0, 2);
@@ -545,6 +425,7 @@ void Gridlines::Render(TestGLCanvas *orig_canvas)
     glDeleteBuffers(1, &VBO);
 }
 
+// utility function to display the coordinate date of the "vertices" vector in each drawing object.
 void Gridlines::displayVertices(){
     int i = 1;
     for (const auto &coord : vertices) {

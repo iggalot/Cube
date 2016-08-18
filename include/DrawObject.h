@@ -10,6 +10,7 @@
 // forward declarations
 class DrawObject;
 class TestGLCanvas;
+class Shader;
 
 class VertexData {
 public:
@@ -36,16 +37,20 @@ public:
     virtual void Render(TestGLCanvas* canvas) = 0;
     virtual void CreateShaderProgram() = 0;
 
-private:
-    VertexData* vertices;
-    VertexData* last;
-    VertexData* head;
+    void setShader(Shader *s) {shader = s; return;}
+    Shader *getShader() {return shader;}
 
-    GLuint* shaderProgram;
-    GLuint* vao;
-    GLuint* vbo;
-    GLuint* ebo;
-    GLuint* textures;
+private:
+
+    Shader* shader;
+
+    // VertexData* vertices;
+    // VertexData* last;
+    // VertexData* head;  
+    // GLuint* vao;
+    // GLuint* vbo;
+    // GLuint* ebo;
+    // GLuint* textures;
 };
 
 class Crosshairs : public DrawObject
@@ -80,7 +85,7 @@ public:
 class Gridlines : public DrawObject{
 public:
     //Gridlines(TestGLCanvas *canvas);
-    Gridlines(TestGLCanvas *canvas, GLfloat x, GLfloat y, GLfloat z);
+    Gridlines(TestGLCanvas *canvas, GLfloat x = 0.5f, GLfloat y = 0.5f, GLfloat z=0.5f);
 
     // copy constructor
     Gridlines(const Gridlines &source);

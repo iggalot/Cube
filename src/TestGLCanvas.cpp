@@ -315,18 +315,23 @@ void TestGLCanvas::CreateDrawObj() {
     GetContext(this);
 
      //   DrawObject *dice = new Dice(this);
-    drawObjects.push_back(new Dice(this));
+    // std::cout << "-- Create Dice" << std::endl;
+    // drawObjects.push_back(new Dice(this));
+    std::cout << "-- Create Triangle" << std::endl;
     drawObjects.push_back(new Triangle(this));
 
+    std::cout << "-- Create Crosshairs" << std::endl;
     // create our crosshairs
     if(m_crosshair == NULL) {
         m_crosshair = new Crosshairs(this);
         drawObjects.push_back(m_crosshair);
     }
 
+    std::cout << "-- Create gridlines" << std::endl;
     // create our gridlines
     if(m_gridlines == NULL) {
-        m_gridlines = new Gridlines(this, 0.25f, 0.10f, 0.10f);;
+//        m_gridlines = new Gridlines(this);
+        m_gridlines = new Gridlines(this, 0.25f, 0.10f, 0.10f);
         drawObjects.push_back(m_gridlines);
     }
 
