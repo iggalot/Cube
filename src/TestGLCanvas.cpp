@@ -37,11 +37,17 @@
 // Include GLFW
 #include </usr/local/include/GLFW/glfw3.h>
 
+// Include GLM
+#include </usr/include/glm/glm.hpp>
+#include </usr/include/glm/gtc/matrix_transform.hpp>
+
+
 #include "../include/cube.h"
 #include "../include/Geometry.h"
 #include "../include/TestGLCanvas.h"
 #include "../include/TestGLContext.h"
 #include "../include/DrawObject.h"
+#include "../include/Camera.h"
 
 // ----------------------------------------------------------------------------
 // TestGLCanvas
@@ -75,6 +81,8 @@ TestGLCanvas::TestGLCanvas(wxWindow *parent, int *attribList)
     m_currMousePos = new Point();
     m_crosshair = NULL;
     m_gridlines = NULL;
+    m_camera = NULL;
+
 //    m_crosshair = new Crosshairs(this);
 
 //    TestGLContext& curr_context = wxGetApp().mainFrame->GetContext(this);
@@ -98,7 +106,7 @@ TestGLCanvas::TestGLCanvas(wxWindow *parent, int *attribList)
     // Connect(wxID_NEW, wxEVT_COMMAND_MENU_SELECTED,
     //    wxCommandEventHandler(MyFrame::OnNewWindow));
 
-    // this should get the frame that is the parent of the canvas.  Must case it
+    // this should get the frame that is the parent of the canvas.  Must cast it
     // to (MyFrame*) because the default GetParent() returns a wxWindow which
     // MyFrame is also derived from.
     myParentFrame = (MyFrame *) this->GetParent(); 
@@ -106,8 +114,8 @@ TestGLCanvas::TestGLCanvas(wxWindow *parent, int *attribList)
 
     glewExperimental = GL_TRUE;
     GLenum err = glewInit();
-//    std::cout << "glewInit() call: " << glewInit() << std::endl;
- if(err != GLEW_OK) {
+    //    std::cout << "glewInit() call: " << glewInit() << std::endl;
+    if(err != GLEW_OK) {
         std::cout << "Error #: " << glGetError() << " str: " << glewGetErrorString(err) << std::endl;;
 
         std::cout << "GLEW_OK: " << GLEW_OK << std::endl;
@@ -120,6 +128,10 @@ TestGLCanvas::TestGLCanvas(wxWindow *parent, int *attribList)
         std::cout << "GL_STACK_OVERFLOW: " << GL_STACK_OVERFLOW << std::endl;       
     } else
         std::cout << "GlewInit() okay" << std::endl; 
+
+    // setup our camera object -- must be after glewInit();
+    m_camera = new Camera(glm::vec3(0.0f, 0.0f, 3.0f));
+
 }
 
 TestGLCanvas::~TestGLCanvas() {
@@ -128,6 +140,7 @@ TestGLCanvas::~TestGLCanvas() {
     delete m_crosshair;
     delete m_glContext;
     delete m_currMousePos;
+    delete m_camera;
 }
 
 void TestGLCanvas::OnPaint(wxPaintEvent& WXUNUSED(event))

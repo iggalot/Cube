@@ -16,6 +16,7 @@ class MyFrame;
 class Point;
 class DrawObject;
 class TestGLContext;
+class Camera;
 
 class TestGLCanvas : public wxGLCanvas
 {
@@ -37,7 +38,7 @@ public:
 
     void CreateDrawObj();  // creates our drafting aids (crosshairs, grid, etc.)
 
-
+    Camera* m_camera;
     DrawObject* m_gridlines;
     DrawObject* m_crosshair;
     TestGLContext* m_glContext;
