@@ -64,6 +64,8 @@ private:
     void OnAbout(wxCommandEvent& event);
     void OnDrawOne(wxCommandEvent& event);
     void OnDrawTwo(wxCommandEvent& event);
+    void OnViewOne(wxCommandEvent& event);
+    void OnViewTwo(wxCommandEvent& event);
     void OnDrawSelect(wxCommandEvent& event);
 };
 
@@ -83,7 +85,9 @@ enum
     DRAW_ONE = wxID_HIGHEST + 2,
     DRAW_TWO = wxID_HIGHEST + 3,
     DRAW_SELECT = wxID_HIGHEST + 4,
-    SpinTimer = wxID_HIGHEST + 5
+    SpinTimer = wxID_HIGHEST + 5,
+    VIEW_ONE = wxID_HIGHEST + 6,
+    VIEW_TWO = wxID_HIGHEST + 7
 };
 
 // IMPLEMENT_APP(MyApp)

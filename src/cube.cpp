@@ -37,6 +37,9 @@
 // Include GLFW
 #include </usr/local/include/GLFW/glfw3.h>
 
+// Include GLM
+#include </usr/include/glm/glm.hpp>
+
 //#include "../include/TestGLCanvas.h"
 //#include "../include/TestGLCanvas.h"
 #include "../include/cube.h"
@@ -44,6 +47,7 @@
 #include "../include/TestGLContext.h"
 #include "../include/TestGLCanvas.h"
 #include "../include/DrawObject.h"
+#include "../include/Camera.h"
 
 
 // ----------------------------------------------------------------------------
@@ -129,6 +133,9 @@ MyFrame::MyFrame( bool stereoWindow )
     menu_draw->Append(DRAW_SELECT,wxT("Select Shape"));
     menu_draw->Append(DRAW_ONE,wxT("One"));
     menu_draw->Append(DRAW_TWO,wxT("Two"));
+    menu_draw->AppendSeparator();
+    menu_draw->Append(VIEW_ONE, wxT("View One"));
+    menu_draw->Append(VIEW_TWO, wxT("View Two"));
 
     wxMenu *menu_help = new wxMenu;
     menu_help->Append(wxID_ABOUT);
@@ -219,6 +226,10 @@ MyFrame::MyFrame( bool stereoWindow )
             wxCommandEventHandler(MyFrame::OnSaveAs));
     Connect(wxID_FILE, wxEVT_COMMAND_MENU_SELECTED,
             wxCommandEventHandler(MyFrame::OnFile));
+    Connect(VIEW_ONE, wxEVT_COMMAND_MENU_SELECTED,
+            wxCommandEventHandler(MyFrame::OnViewOne));
+    Connect(VIEW_TWO, wxEVT_COMMAND_MENU_SELECTED,
+            wxCommandEventHandler(MyFrame::OnViewTwo));
 }
 
 void MyFrame::OnClose(wxCommandEvent& WXUNUSED(event))
@@ -269,6 +280,17 @@ void MyFrame::OnDrawTwo( wxCommandEvent& WXUNUSED(event) )
     m_canvas->Update();
 }
 
+void MyFrame::OnViewOne( wxCommandEvent& WXUNUSED(event) ) {
+    m_canvas->getCamera()->Position = glm::vec3(0.0f, 0.0f, 1.0f);
+    m_canvas->Refresh();  // mark the frame as dirty
+    m_canvas->Update();  // immediately update the window
+}
+
+void MyFrame::OnViewTwo( wxCommandEvent& WXUNUSED(event) ) {
+    m_canvas->getCamera()->Position = glm::vec3(0.0f, 0.0f, 15.0f);
+    m_canvas->Refresh();  // mark the frame as dirty
+    m_canvas->Update();  // immediately update the window
+}
 
 
 void MyFrame::OnFile(wxCommandEvent& WXUNUSED(event) )
@@ -286,10 +308,9 @@ void MyFrame::OnSaveAs(wxCommandEvent& WXUNUSED(event) )
     IncompleteAction();
 }
 
-
-
 void MyFrame::OnAbout(wxCommandEvent& WXUNUSED(event) )
 {
        wxMessageBox( "SketcherApp v1.0 - by James Allen.\nCopyright 2016",
                  "About SketcherApp", wxOK | wxICON_INFORMATION );
 }
+

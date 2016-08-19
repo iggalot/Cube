@@ -18,6 +18,10 @@
         this->Yaw = yaw;
         this->Pitch = pitch;
         this->updateCameraVectors();
+
+        this->modelMatrix = glm::mat4();		//default identity matrix
+        this->viewMatrix = glm::mat4();			//default identity matrix
+        this->projectionMatrix = glm::mat4(); 	//default identity matrix   
     }
 
     // Constructor with scalar values
@@ -29,6 +33,10 @@
         this->Yaw = yaw;
         this->Pitch = pitch;
         this->updateCameraVectors();
+
+        this->modelMatrix = glm::mat4();		//default identity matrix
+        this->viewMatrix = glm::mat4();			//default identity matrix
+        this->projectionMatrix = glm::mat4(); 	//default identity matrix   
     }
 
     // Returns the view matrix calculated using Eular Angles and the LookAt Matrix
@@ -37,7 +45,7 @@
         return glm::lookAt(this->Position, this->Position + this->Front, this->Up);
     }
 
-        // Processes input received from any keyboard-like input system. Accepts input parameter in the form of camera defined ENUM (to abstract it from windowing systems)
+    // Processes input received from any keyboard-like input system. Accepts input parameter in the form of camera defined ENUM (to abstract it from windowing systems)
     void Camera::ProcessKeyboard(Camera_Movement direction, GLfloat deltaTime)
     {
         GLfloat velocity = this->MovementSpeed * deltaTime;

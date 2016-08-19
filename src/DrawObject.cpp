@@ -27,11 +27,20 @@
 // Include GLFW
 #include </usr/local/include/GLFW/glfw3.h>
 
+// Include GLM
+#include </usr/include/glm/glm.hpp>
+#include </usr/include/glm/gtc/matrix_transform.hpp>
+#include </usr/include/glm/gtc/type_ptr.hpp>
+// #include </usr/include/glm/ext.hpp>  // for displaying vectors
+// #include </usr/include/glm/gtx/string_cast.hpp>  // for displaying vectors
+
+
 #include "../include/cube.h"
 #include "../include/Geometry.h"
 #include "../include/TestGLCanvas.h"
 #include "../include/DrawObject.h"
 #include "../include/Shader.h"
+#include "../include/Camera.h"
 
 // const GLchar* myvertexShaderSource = "#version 300 es\n"
 //     "layout (location = 0) in vec3 position;\n"
@@ -45,6 +54,16 @@
 //     "{\n"
 //     "color = vec4(1.0f, 0.5f, 0.2f, 1.0f);\n"
 //     "}\n\0";
+
+void displayMat4(glm::mat4 mat) {
+    const float *pSource = (const float*)glm::value_ptr(mat);
+    std::cout << "===================================" << std::endl;
+    std::cout << pSource[0] << " , " << pSource[1] << " , " << pSource[2] << " , " << pSource[3] << std::endl;
+    std::cout << pSource[4] << " , " << pSource[5] << " , " << pSource[6] << " , " << pSource[7] << std::endl;
+    std::cout << pSource[8] << " , " << pSource[9] << " , " << pSource[10] << " , " << pSource[11] << std::endl;
+    std::cout << pSource[12] << " , " << pSource[13] << " , " << pSource[14] << " , " << pSource[15] << std::endl;
+    std::cout << "===================================" << std::endl;
+}
 
 // default constructor
 VertexData::VertexData() {
@@ -120,6 +139,19 @@ void Crosshairs::Render(TestGLCanvas *orig_canvas)
     // Render
     glUseProgram(getShader()->getShaderProgNum());
  //   glUseProgram(shaderProgram);
+
+        // // Get the uniform locations
+        GLint modelLoc = glGetUniformLocation(this->getShader()->getShaderProgNum(), "model");
+        GLint viewLoc = glGetUniformLocation(this->getShader()->getShaderProgNum(), "view");
+        GLint projLoc = glGetUniformLocation(this->getShader()->getShaderProgNum(), "projection");
+    
+        glm::mat4 identity = glm::mat4(); // so that the cross hairs arent scaled when they vertices are passed to the shaders
+
+        // // Pass the matrices to the shader
+        glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(identity));
+        glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(identity));
+        glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(identity));
+
     glBindVertexArray(VAO);
     glDrawArrays(GL_LINES, 0, num_verts);
     glBindVertexArray(0);
@@ -258,6 +290,19 @@ void Triangle::Render(TestGLCanvas *orig_canvas) {
     // Draw our first triangle
 //    glUseProgram(shaderProgram);
     glUseProgram(getShader()->getShaderProgNum());
+
+        // // Get the uniform locations
+        GLint modelLoc = glGetUniformLocation(this->getShader()->getShaderProgNum(), "model");
+        GLint viewLoc = glGetUniformLocation(this->getShader()->getShaderProgNum(), "view");
+        GLint projLoc = glGetUniformLocation(this->getShader()->getShaderProgNum(), "projection");
+    
+        // std::cout << "modelLoc: " << modelLoc << "viewLoc: " << viewLoc << "projLoc: " << projLoc << std::endl;
+
+        // // Pass the matrices to the shader
+        glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(orig_canvas->getCamera()->modelMatrix));
+        glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(orig_canvas->getCamera()->viewMatrix));
+        glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(orig_canvas->getCamera()->projectionMatrix));
+
     glBindVertexArray(VAO);
     glDrawArrays(GL_TRIANGLES, 0, 3);
     glBindVertexArray(0);
@@ -413,6 +458,19 @@ void Gridlines::Render(TestGLCanvas *orig_canvas)
 
     // Draw our first triangle
     glUseProgram(getShader()->getShaderProgNum());
+
+            // // Get the uniform locations
+        GLint modelLoc = glGetUniformLocation(this->getShader()->getShaderProgNum(), "model");
+        GLint viewLoc = glGetUniformLocation(this->getShader()->getShaderProgNum(), "view");
+        GLint projLoc = glGetUniformLocation(this->getShader()->getShaderProgNum(), "projection");
+    
+        // std::cout << "modelLoc: " << modelLoc << "viewLoc: " << viewLoc << "projLoc: " << projLoc << std::endl;
+
+        // // Pass the matrices to the shader
+        glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(orig_canvas->getCamera()->modelMatrix));
+        glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(orig_canvas->getCamera()->viewMatrix));
+        glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(orig_canvas->getCamera()->projectionMatrix));
+
 //    glUseProgram(shaderProgram);
     glBindVertexArray(VAO);
     glDrawArrays(GL_LINES, 0, num_verts);

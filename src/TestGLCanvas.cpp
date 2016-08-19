@@ -40,13 +40,14 @@
 // Include GLM
 #include </usr/include/glm/glm.hpp>
 #include </usr/include/glm/gtc/matrix_transform.hpp>
-
+//#include </usr/include/glm/gtc/type_ptr.hpp>
 
 #include "../include/cube.h"
 #include "../include/Geometry.h"
 #include "../include/TestGLCanvas.h"
 #include "../include/TestGLContext.h"
 #include "../include/DrawObject.h"
+#include "../include/Shader.h"
 #include "../include/Camera.h"
 
 // ----------------------------------------------------------------------------
@@ -114,7 +115,7 @@ TestGLCanvas::TestGLCanvas(wxWindow *parent, int *attribList)
 
     glewExperimental = GL_TRUE;
     GLenum err = glewInit();
-    //    std::cout << "glewInit() call: " << glewInit() << std::endl;
+
     if(err != GLEW_OK) {
         std::cout << "Error #: " << glGetError() << " str: " << glewGetErrorString(err) << std::endl;;
 
@@ -193,12 +194,30 @@ void TestGLCanvas::OnPaint(wxPaintEvent& WXUNUSED(event))
         // }
 
 //        curr_context.DrawRotatedCube(m_xangle, m_yangle);
-        glClearColor(0.5f, 0.5f, 0.65f, 0.0);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glClearColor(0.5f, 0.5f, 0.65f, 0.0);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        for(auto &drawobj : this->drawObjects ) {
-            drawobj->Render(this);
-        }
+    // // Create camera transformation
+//    glm::mat4 model;
+    // model = glm::mat4();  // for an identity matrix
+
+    // // this will make the object progressively get further away
+    // getCamera()->modelMatrix = glm::translate(getCamera()->modelMatrix, glm::vec3(0.0f, 0.0f, -0.5f));
+ 
+    // this will make the object remain in its current position
+    getCamera()->modelMatrix = glm::translate(getCamera()->modelMatrix, glm::vec3(0.0f, 0.0f, 0.0f));
+
+
+//    glm::mat4 view;
+    getCamera()->viewMatrix = getCamera()->GetViewMatrix();
+//    glm::mat4 projection;
+    getCamera()->projectionMatrix = glm::perspective(getCamera()->Zoom, (float)CANVAS_WIDTH/(float)CANVAS_HEIGHT, 0.1f, 1000.0f);
+
+
+
+    for(auto &drawobj : this->drawObjects ) {
+        drawobj->Render(this);
+    }
         //This line will reinstall the spinning cube and the basic triangle, in lieu of
         // the more general drawing object inheritance object
 //        GetContext(this).DrawRotatedCube(m_xangle, m_yangle);
@@ -209,7 +228,7 @@ void TestGLCanvas::OnPaint(wxPaintEvent& WXUNUSED(event))
         //     m_stereoWarningAlreadyDisplayed = true;
         //     wxLogError("Stereo not supported by the graphics card.");
         // }
-        glFlush();
+    glFlush();
 
         //CheckGLError();
 //    }
@@ -340,7 +359,7 @@ void TestGLCanvas::CreateDrawObj() {
         drawObjects.push_back(m_crosshair);
     }
 
-    std::cout << "-- Create gridlines" << std::endl;
+    std::cout << "-- Create Gridlines" << std::endl;
     // create our gridlines
     if(m_gridlines == NULL) {
 //        m_gridlines = new Gridlines(this);

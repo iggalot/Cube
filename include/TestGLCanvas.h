@@ -32,20 +32,21 @@ public:
     void setCurrentDrawNum(GLuint num) {m_current_drawnum = num;}
     void setCurrMousePos(int x, int y, int z);
     Point* getCurrMousePos() {return m_currMousePos;}
+    Camera* getCamera() {return m_camera;}
+
     // Returns the shared context used by all frames and sets it as current for
     // the given canvas.
     TestGLContext& GetContext(wxGLCanvas *canvas);
 
     void CreateDrawObj();  // creates our drafting aids (crosshairs, grid, etc.)
 
-    Camera* m_camera;
     DrawObject* m_gridlines;
     DrawObject* m_crosshair;
     TestGLContext* m_glContext;
     std::vector<DrawObject*> drawObjects;
 
 private:
-
+    Camera* m_camera;
     GLuint m_current_drawnum;
     Point* m_currMousePos;
     MyFrame *myParentFrame;
