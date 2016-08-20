@@ -31,6 +31,8 @@ public:
     GLuint getCurrentDrawNum() {return m_current_drawnum;}
     void setCurrentDrawNum(GLuint num) {m_current_drawnum = num;}
     void setCurrMousePos(int x, int y, int z);
+    void setCurrMousePos(Point* point);
+
     Point* getCurrMousePos() {return m_currMousePos;}
     Camera* getCamera() {return m_camera;}
 
@@ -39,6 +41,8 @@ public:
     TestGLContext& GetContext(wxGLCanvas *canvas);
 
     void CreateDrawObj();  // creates our drafting aids (crosshairs, grid, etc.)
+    void updateInfoBar();  // updates the information bar at bottom of window.
+    void processCameraEvent(wxKeyEvent& event); // processes camera events
 
     DrawObject* m_gridlines;
     DrawObject* m_crosshair;
@@ -56,6 +60,9 @@ private:
     void OnKeyDown(wxKeyEvent& event);
     void OnSpinTimer(wxTimerEvent& WXUNUSED(event));
     void OnMouseMove(wxMouseEvent& event);
+    void OnMouseWheel(wxMouseEvent& event);
+
+    void OnKeyPress(wxKeyEvent& event);
 
     // angles of rotation around x- and y- axis
     float m_xangle,

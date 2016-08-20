@@ -133,6 +133,12 @@ TestGLCanvas::TestGLCanvas(wxWindow *parent, int *attribList)
     // setup our camera object -- must be after glewInit();
     m_camera = new Camera(glm::vec3(0.0f, 0.0f, 3.0f));
 
+    // This handles out key stroke captures
+    Connect(wxEVT_CHAR,
+        wxKeyEventHandler(TestGLCanvas::OnKeyPress));
+    Connect(wxEVT_MOUSEWHEEL,
+        wxMouseEventHandler(TestGLCanvas::OnMouseWheel));
+
 }
 
 TestGLCanvas::~TestGLCanvas() {
@@ -198,22 +204,14 @@ void TestGLCanvas::OnPaint(wxPaintEvent& WXUNUSED(event))
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     // // Create camera transformation
-//    glm::mat4 model;
-    // model = glm::mat4();  // for an identity matrix
 
     // // this will make the object progressively get further away
     // getCamera()->modelMatrix = glm::translate(getCamera()->modelMatrix, glm::vec3(0.0f, 0.0f, -0.5f));
  
     // this will make the object remain in its current position
     getCamera()->modelMatrix = glm::translate(getCamera()->modelMatrix, glm::vec3(0.0f, 0.0f, 0.0f));
-
-
-//    glm::mat4 view;
     getCamera()->viewMatrix = getCamera()->GetViewMatrix();
-//    glm::mat4 projection;
     getCamera()->projectionMatrix = glm::perspective(getCamera()->Zoom, (float)CANVAS_WIDTH/(float)CANVAS_HEIGHT, 0.1f, 1000.0f);
-
-
 
     for(auto &drawobj : this->drawObjects ) {
         drawobj->Render(this);
@@ -232,7 +230,7 @@ void TestGLCanvas::OnPaint(wxPaintEvent& WXUNUSED(event))
 
         //CheckGLError();
 //    }
-    SwapBuffers();
+    SwapBuffers();  // display the final results
 }
 
 void TestGLCanvas::Spin(float xSpin, float ySpin)
@@ -243,12 +241,61 @@ void TestGLCanvas::Spin(float xSpin, float ySpin)
     Refresh(false);
 }
 
+void TestGLCanvas::processCameraEvent(wxKeyEvent& event) {
+    std::string str = ""; 
+
+    switch ( event.GetKeyCode() )
+    {
+        case WXK_RIGHT:
+            str += " -- RIGHT";
+            getCamera()->ProcessKeyboard(RIGHT);
+//            Spin( 0.0, -angle );
+            break;
+
+        case WXK_LEFT:
+            str += " -- LEFT";
+            getCamera()->ProcessKeyboard(LEFT);
+//            Spin( 0.0, angle );
+            break;
+
+        case WXK_DOWN:
+            str += " -- DOWN";
+            getCamera()->ProcessKeyboard(BACKWARD);
+//            Spin( -angle, 0.0 );
+            break;
+
+        case WXK_UP:
+            str += " -- UP";
+            getCamera()->ProcessKeyboard(FORWARD);
+//            Spin( angle, 0.0 );
+            break;
+
+        default:
+            event.Skip();
+            return;
+
+
+    }  
+    
+    Refresh();
+    Update();
+
+    std::cout << str << std::endl; 
+}
+
 void TestGLCanvas::OnKeyDown(wxKeyEvent& event)
 {
     float angle = 5.0;
 
+    if(getCamera()->getCameraState()) {
+        processCameraEvent(event);
+        return;
+    }
+
     switch ( event.GetKeyCode() )
     {
+
+
         case WXK_RIGHT:
             Spin( 0.0, -angle );
             break;
@@ -283,18 +330,49 @@ void TestGLCanvas::OnSpinTimer(wxTimerEvent& WXUNUSED(event))
     Spin(0.0, 4.0);
 }
 
+
+void TestGLCanvas::OnMouseWheel(wxMouseEvent& event)
+{
+    // if the camera mode is active
+    if(getCamera()->getCameraState()) {
+        if(event.GetWheelRotation() > 0) {
+            std::cout << "mouse wheel forward" << std::endl;
+            getCamera()->ProcessKeyboard(FORWARD);
+        }
+        if(event.GetWheelRotation() < 0) {      
+            std::cout << "mouse wheel backward" << std::endl;
+            getCamera()->ProcessKeyboard(BACKWARD);
+        }
+        updateInfoBar();
+    }
+}
+
+
 void TestGLCanvas::OnMouseMove(wxMouseEvent& event)
 {
+    if(getCamera()->getCameraState()) {
+        std::cout << "==============" << std::endl;
+        Point* last_point = getCurrMousePos();  // the old point
+        Point curr_point = Point(event.GetX(), event.GetY(), 0);
+        Point dist_moved = curr_point - *last_point;
+
+        // std::cout << "curr point" << curr_point.Print() << std::endl;
+        // std::cout << "last point" << (*(last_point)).Print() << std::endl;;
+        // std::cout << "dist moved" << dist_moved.Print() << std::endl; 
+
+        getCamera()->ProcessMouseMovement((GLfloat)dist_moved.getX(), (GLfloat)-dist_moved.getY(), TRUE);
+    }
+
     setCurrMousePos(event.GetX(), event.GetY(), 0);
 
-    this->myParentFrame->getStaticLabel()->SetLabel(
-        wxT("Window Coords: ")
-        +wxString::FromDouble(event.GetX())
-        +wxT(",")
-        +wxString::FromDouble(event.GetY())
-    );
+    // Point p1 = Point(1, 1, 1);
+    // Point p2 = Point(2, 3, 4);
+    // Point p3, p4;
+    // p3 = (p1 + p2);
+    // p3.Print();
+    // p4 = (p1 - p2);
+    // p4.Print();
 
-    Refresh();  // mark the frame as dirty
     //   Update();  // immediately update the window
 
     // std::cout << "Coord: (" << wxString::FromDouble(event.GetX()) << " , " << 
@@ -302,8 +380,40 @@ void TestGLCanvas::OnMouseMove(wxMouseEvent& event)
     // // wxMessageBox("X Coordinate: "+wxString::FromDouble(event.GetX())+"\nY Coordinate: "+wxString::FromDouble(event.GetY()),
     // //    "Mouse Move Event",
     // //    wxOK);  
+
+    updateInfoBar();
 }
 
+void TestGLCanvas::updateInfoBar() {
+    std::string str ="";
+
+    // Coord info
+    str += "Coord: ";
+    str += std::to_string(getCurrMousePos()->getX()); 
+    str += " "; 
+    str += std::to_string(getCurrMousePos()->getY());
+    str += "      ";
+    str += "Camera: ";
+
+    if(getCamera()->getCameraState())
+        str += " ON";
+    else
+        str += " OFF";
+
+    this->myParentFrame->getStaticLabel()->SetLabel(
+        wxString(str)
+    );
+
+    // this->myParentFrame->getStaticLabel()->SetLabel(
+    //     wxT("Window Coords: ")
+    //     +wxString::FromDouble(event.GetX())
+    //     +wxT(",")
+    //     +wxString::FromDouble(event.GetY())
+    // );
+
+    Refresh();  // mark the frame as dirty
+    Update();
+}
 // wxString glGetwxString(GLenum name)
 // {
 //     const GLubyte *v = glGetString(name);
@@ -322,6 +432,11 @@ void TestGLCanvas::OnMouseMove(wxMouseEvent& event)
 void TestGLCanvas::setCurrMousePos(int x, int y, int z) {
     delete m_currMousePos; 
     m_currMousePos = new Point(x,y,z);
+}
+
+void TestGLCanvas::setCurrMousePos(Point* point) {
+    delete m_currMousePos;
+    m_currMousePos = point;
 }
 
 TestGLContext& TestGLCanvas::GetContext(wxGLCanvas *canvas)
@@ -368,6 +483,29 @@ void TestGLCanvas::CreateDrawObj() {
     }
 
     // Add a drawing item to our list to test (this is the dice from the TestGLContext)
+}
 
+// Drawing related key presses
+void TestGLCanvas::OnKeyPress(wxKeyEvent& event) {
+    switch(event.GetKeyCode()) {
+        case 's':
+        case 'S':
+            std::cout << "S pressed" << std::endl;
+            break;
 
+        case 'c':
+        case wxKeyCode('C'):
+            std::string state = "Camera";
+            if(getCamera()->getCameraState()) {
+                getCamera()->setCameraState(false);
+                state = state + " OFF";
+            } else {
+                getCamera()->setCameraState(true);
+                state = state + " ON";
+            }
+            std::cout << state << std::endl;
+            break;
+    }
+
+    updateInfoBar();
 }

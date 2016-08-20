@@ -36,7 +36,7 @@ class Camera
 {
 public:
     // Camera Attributes
-    glm::vec3 Position;
+    //glm::vec3 Position;
     glm::vec3 Front;
     glm::vec3 Up;
     glm::vec3 Right;
@@ -48,6 +48,9 @@ public:
     GLfloat MovementSpeed;
     GLfloat MouseSensitivity;
     GLfloat Zoom;
+
+    GLfloat deltaTime = 0.0f;
+    GLfloat lastFrame = 0.0f;
 
     // Constructor with vectors
     Camera(glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f), 
@@ -61,20 +64,29 @@ public:
     glm::mat4 GetViewMatrix();
 
     // Processes input received from any keyboard-like input system. Accepts input parameter in the form of camera defined ENUM (to abstract it from windowing systems)
-    void ProcessKeyboard(Camera_Movement direction, GLfloat deltaTime);
+    void ProcessKeyboard(Camera_Movement direction, GLfloat deltaTime = (0.1f / SPEED));
 
     // Processes input received from a mouse input system. Expects the offset value in both the x and y direction.
     void ProcessMouseMovement(GLfloat xoffset, GLfloat yoffset, GLboolean constrainPitch = true);
 
-    // Processes input received from a mouse scroll-wheel event. Only requires input on the vertical wheel-axis
-    void ProcessMouseScroll(GLfloat yoffset);
+    // // Processes input received from a mouse scroll-wheel event. Only requires input on the vertical wheel-axis
+    // void ProcessMouseScroll(GLfloat yoffset);
 
+    void setCameraState(bool state) {cameraIsActive = state; return;}
+    bool getCameraState() {return cameraIsActive;}
+
+    void setPos(glm::vec3 pos) {Position = pos; return;} // sets the camera position
+    glm::vec3 getPos() { return Position; }              // return ths camera position
+
+    // view related matrices
     glm::mat4 modelMatrix;
     glm::mat4 viewMatrix;
     glm::mat4 projectionMatrix;
 
 private:
-    // Calculates the front vector from the Camera's (updated) Eular Angles
+    glm::vec3 Position;
+
+    bool cameraIsActive;
     void updateCameraVectors();
 };
 

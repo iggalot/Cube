@@ -18,6 +18,7 @@
         this->Yaw = yaw;
         this->Pitch = pitch;
         this->updateCameraVectors();
+        setCameraState(false);
 
         this->modelMatrix = glm::mat4();		//default identity matrix
         this->viewMatrix = glm::mat4();			//default identity matrix
@@ -33,6 +34,7 @@
         this->Yaw = yaw;
         this->Pitch = pitch;
         this->updateCameraVectors();
+        setCameraState(false);
 
         this->modelMatrix = glm::mat4();		//default identity matrix
         this->viewMatrix = glm::mat4();			//default identity matrix
@@ -81,16 +83,16 @@
         this->updateCameraVectors();
     }
 
-    // Processes input received from a mouse scroll-wheel event. Only requires input on the vertical wheel-axis
-    void Camera::ProcessMouseScroll(GLfloat yoffset)
-    {
-        if (this->Zoom >= 1.0f && this->Zoom <= 45.0f)
-            this->Zoom -= yoffset;
-        if (this->Zoom <= 1.0f)
-            this->Zoom = 1.0f;
-        if (this->Zoom >= 45.0f)
-            this->Zoom = 45.0f;
-    }
+    // // Processes input received from a mouse scroll-wheel event. Only requires input on the vertical wheel-axis
+    // void Camera::ProcessMouseScroll(GLfloat yoffset)
+    // {
+    //     if (this->Zoom >= 1.0f && this->Zoom <= 45.0f)
+    //         this->Zoom -= yoffset;
+    //     if (this->Zoom <= 1.0f)
+    //         this->Zoom = 1.0f;
+    //     if (this->Zoom >= 45.0f)
+    //         this->Zoom = 45.0f;
+    // }
 
         // Calculates the front vector from the Camera's (updated) Eular Angles
     void Camera::updateCameraVectors()

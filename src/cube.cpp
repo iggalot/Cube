@@ -281,13 +281,13 @@ void MyFrame::OnDrawTwo( wxCommandEvent& WXUNUSED(event) )
 }
 
 void MyFrame::OnViewOne( wxCommandEvent& WXUNUSED(event) ) {
-    m_canvas->getCamera()->Position = glm::vec3(0.0f, 0.0f, 1.0f);
+    m_canvas->getCamera()->setPos(glm::vec3(0.0f, 0.0f, 1.0f));
     m_canvas->Refresh();  // mark the frame as dirty
     m_canvas->Update();  // immediately update the window
 }
 
 void MyFrame::OnViewTwo( wxCommandEvent& WXUNUSED(event) ) {
-    m_canvas->getCamera()->Position = glm::vec3(0.0f, 0.0f, 15.0f);
+    m_canvas->getCamera()->setPos(glm::vec3(0.0f, 0.0f, 15.0f));
     m_canvas->Refresh();  // mark the frame as dirty
     m_canvas->Update();  // immediately update the window
 }
