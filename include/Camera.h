@@ -20,7 +20,9 @@ enum Camera_Movement {
     FORWARD,
     BACKWARD,
     LEFT,
-    RIGHT
+    RIGHT,
+    UP,
+    DOWN
 };
 
 // Default camera values
@@ -52,6 +54,8 @@ public:
     GLfloat deltaTime = 0.0f;
     GLfloat lastFrame = 0.0f;
 
+    glm::vec3 orig_pos;  // our original position...this should probably be const.
+
     // Constructor with vectors
     Camera(glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f), 
         glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f), 
@@ -71,6 +75,8 @@ public:
 
     // // Processes input received from a mouse scroll-wheel event. Only requires input on the vertical wheel-axis
     // void ProcessMouseScroll(GLfloat yoffset);
+
+    void ResetCameraView();  // resets the camera view back to the original position
 
     void setCameraState(bool state) {cameraIsActive = state; return;}
     bool getCameraState() {return cameraIsActive;}

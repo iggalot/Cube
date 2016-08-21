@@ -13,6 +13,7 @@
     Camera::Camera(glm::vec3 position, glm::vec3 up, GLfloat yaw, GLfloat pitch) 
     	: Front(glm::vec3(0.0f, 0.0f, -1.0f)), MovementSpeed(SPEED), MouseSensitivity(SENSITIVTY), Zoom(ZOOM)
     {
+        this->orig_pos = position;  // stores our original position.
         this->Position = position;
         this->WorldUp = up;
         this->Yaw = yaw;
@@ -59,6 +60,10 @@
             this->Position -= this->Right * velocity;
         if (direction == RIGHT)
             this->Position += this->Right * velocity;
+        if (direction == UP)
+            this->Position += this->Up * velocity;
+        if (direction == DOWN)
+            this->Position -= this->Up * velocity;
     }
 
     // Processes input received from a mouse input system. Expects the offset value in both the x and y direction.
@@ -106,4 +111,19 @@
         // Also re-calculate the Right and Up vector
         this->Right = glm::normalize(glm::cross(this->Front, this->WorldUp));  // Normalize the vectors, because their length gets closer to 0 the more you look up or down which results in slower movement.
         this->Up    = glm::normalize(glm::cross(this->Right, this->Front));
+    }
+
+    // Reset the camera position back to start location.
+    void Camera::ResetCameraView()
+    {
+        this->Position = glm::vec3(orig_pos); 
+        this->Up = glm::vec3(0.0f, 1.0f, 0.0f);
+        this->Front = glm::vec3(0.0f, 0.0f, -1.0f);
+        this->Yaw = YAW;
+        this->Pitch = PITCH;
+        //this->updateCameraVectors();
+
+        this->modelMatrix = glm::mat4();        //default identity matrix
+        this->viewMatrix = glm::mat4();         //default identity matrix
+        this->projectionMatrix = glm::mat4();   //default identity matrix   
     }

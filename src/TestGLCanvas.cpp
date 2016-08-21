@@ -259,22 +259,30 @@ void TestGLCanvas::processCameraEvent(wxKeyEvent& event) {
             break;
 
         case WXK_DOWN:
-            str += " -- DOWN";
+            str += " -- BACKWARD";
             getCamera()->ProcessKeyboard(BACKWARD);
 //            Spin( -angle, 0.0 );
             break;
 
         case WXK_UP:
-            str += " -- UP";
+            str += " -- FORWARD";
             getCamera()->ProcessKeyboard(FORWARD);
 //            Spin( angle, 0.0 );
+            break;
+        case WXK_SPACE:
+            str += " -- UP";
+            getCamera()->ProcessKeyboard(UP);
+            break;
+
+        case 'r':
+        case 'R':
+            str += " -- RESET VIEW";
+            getCamera()->ResetCameraView();
             break;
 
         default:
             event.Skip();
             return;
-
-
     }  
     
     Refresh();
@@ -294,8 +302,6 @@ void TestGLCanvas::OnKeyDown(wxKeyEvent& event)
 
     switch ( event.GetKeyCode() )
     {
-
-
         case WXK_RIGHT:
             Spin( 0.0, -angle );
             break;
