@@ -130,6 +130,10 @@ MyFrame::MyFrame( bool stereoWindow )
     menu->AppendSeparator();
 
     wxMenu *menu_draw = new wxMenu;
+    menu_draw->Append(DRAW_OVERLAY_GRID,wxT("Overlay GRID"));
+    menu_draw->Append(DRAW_XY_GRID,wxT("XY GRID"));
+    menu_draw->Append(DRAW_YZ_GRID,wxT("YZ GRID"));
+    menu_draw->Append(DRAW_XZ_GRID,wxT("XZ GRID"));
     menu_draw->Append(DRAW_SELECT,wxT("Select Shape"));
     menu_draw->Append(DRAW_ONE,wxT("One"));
     menu_draw->Append(DRAW_TWO,wxT("Two"));
@@ -218,6 +222,16 @@ MyFrame::MyFrame( bool stereoWindow )
             wxCommandEventHandler(MyFrame::OnDrawOne));   
     Connect(DRAW_TWO, wxEVT_COMMAND_MENU_SELECTED,
             wxCommandEventHandler(MyFrame::OnDrawTwo)); 
+
+    Connect(DRAW_XY_GRID, wxEVT_COMMAND_MENU_SELECTED,
+            wxCommandEventHandler(MyFrame::ToggleXYGrid)); 
+    Connect(DRAW_YZ_GRID, wxEVT_COMMAND_MENU_SELECTED,
+            wxCommandEventHandler(MyFrame::ToggleYZGrid));
+    Connect(DRAW_XZ_GRID, wxEVT_COMMAND_MENU_SELECTED,
+            wxCommandEventHandler(MyFrame::ToggleXZGrid));
+    Connect(DRAW_OVERLAY_GRID, wxEVT_COMMAND_MENU_SELECTED,
+            wxCommandEventHandler(MyFrame::ToggleOverlayGrid));
+
     Connect(wxID_ABOUT, wxEVT_COMMAND_MENU_SELECTED,
             wxCommandEventHandler(MyFrame::OnAbout));
     Connect(wxID_SAVE, wxEVT_COMMAND_MENU_SELECTED,
@@ -314,3 +328,54 @@ void MyFrame::OnAbout(wxCommandEvent& WXUNUSED(event) )
                  "About SketcherApp", wxOK | wxICON_INFORMATION );
 }
 
+void MyFrame::ToggleXYGrid(wxCommandEvent& WXUNUSED(event) )
+{
+    if(m_canvas->m_xy_grid->isVisible)
+        m_canvas->m_xy_grid->isVisible = false;
+    else
+        m_canvas->m_xy_grid->isVisible = true;
+
+    m_canvas->updateInfoBar();
+    Refresh();
+    Update();
+    return;
+}
+
+void MyFrame::ToggleYZGrid(wxCommandEvent& WXUNUSED(event) )
+{
+    if(m_canvas->m_yz_grid->isVisible)
+        m_canvas->m_yz_grid->isVisible = false;
+    else
+        m_canvas->m_yz_grid->isVisible = true;
+    m_canvas->updateInfoBar();
+
+    Refresh();
+    Update();
+    return;
+}
+
+void MyFrame::ToggleXZGrid(wxCommandEvent& WXUNUSED(event) )
+{
+    if(m_canvas->m_xz_grid->isVisible)
+        m_canvas->m_xz_grid->isVisible = false;
+    else
+        m_canvas->m_xz_grid->isVisible = true;  
+
+    m_canvas->updateInfoBar();
+    Refresh();
+    Update();
+    return;
+}
+
+void MyFrame::ToggleOverlayGrid(wxCommandEvent& WXUNUSED(event) )
+{
+    if(m_canvas->m_gridlines->isVisible)
+        m_canvas->m_gridlines->isVisible = false;
+    else
+        m_canvas->m_gridlines->isVisible = true;  
+
+    m_canvas->updateInfoBar();
+    Refresh();
+    Update();
+    return;
+}

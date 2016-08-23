@@ -214,7 +214,8 @@ void TestGLCanvas::OnPaint(wxPaintEvent& WXUNUSED(event))
     getCamera()->projectionMatrix = glm::perspective(getCamera()->Zoom, (float)CANVAS_WIDTH/(float)CANVAS_HEIGHT, 0.1f, 1000.0f);
 
     for(auto &drawobj : this->drawObjects ) {
-        drawobj->Render(this);
+        if(drawobj->isVisible)
+            drawobj->Render(this);
     }
         //This line will reinstall the spinning cube and the basic triangle, in lieu of
         // the more general drawing object inheritance object
@@ -342,11 +343,11 @@ void TestGLCanvas::OnMouseWheel(wxMouseEvent& event)
     // if the camera mode is active
     if(getCamera()->getCameraState()) {
         if(event.GetWheelRotation() > 0) {
-            std::cout << "mouse wheel forward" << std::endl;
+ //           std::cout << "mouse wheel forward" << std::endl;
             getCamera()->ProcessKeyboard(FORWARD);
         }
         if(event.GetWheelRotation() < 0) {      
-            std::cout << "mouse wheel backward" << std::endl;
+//            std::cout << "mouse wheel backward" << std::endl;
             getCamera()->ProcessKeyboard(BACKWARD);
         }
         updateInfoBar();
@@ -357,7 +358,7 @@ void TestGLCanvas::OnMouseWheel(wxMouseEvent& event)
 void TestGLCanvas::OnMouseMove(wxMouseEvent& event)
 {
     if(getCamera()->getCameraState()) {
-        std::cout << "==============" << std::endl;
+//        std::cout << "==============" << std::endl;
         Point* last_point = getCurrMousePos();  // the old point
         Point curr_point = Point(event.GetX(), event.GetY(), 0);
         Point dist_moved = curr_point - *last_point;
@@ -405,6 +406,19 @@ void TestGLCanvas::updateInfoBar() {
         str += " ON";
     else
         str += " OFF";
+
+    str += "      ";
+    str += "Grid: ";
+    if(!(m_xy_grid->isVisible) && !(m_yz_grid->isVisible) && !(m_xz_grid->isVisible))
+        str += " None";
+    else {
+        if(m_xy_grid->isVisible)
+            str += " XY";
+        if(m_yz_grid->isVisible)
+            str += " YZ";
+        if(m_xz_grid->isVisible)
+            str += " XZ";
+    }
 
     this->myParentFrame->getStaticLabel()->SetLabel(
         wxString(str)
@@ -484,8 +498,14 @@ void TestGLCanvas::CreateDrawObj() {
     // create our gridlines
     if(m_gridlines == NULL) {
 //        m_gridlines = new Gridlines(this);
-        m_gridlines = new Gridlines(this, 0.25f, 0.10f, 0.10f);
+        m_gridlines = new Gridlines(this, 0.25f, 0.10f, 0.10f, OVERLAY);
         drawObjects.push_back(m_gridlines);
+        m_xy_grid = new Gridlines(this, 0.25f, 0.10f, 0.10f, XY_PLANE);
+        drawObjects.push_back(m_xy_grid);
+        m_xz_grid = new Gridlines(this, 0.25f, 0.10f, 0.10f, XZ_PLANE);
+        drawObjects.push_back(m_xz_grid);
+        m_yz_grid = new Gridlines(this, 0.25f, 0.10f, 0.10f, YZ_PLANE);
+        drawObjects.push_back(m_yz_grid);
     }
 
     // Add a drawing item to our list to test (this is the dice from the TestGLContext)

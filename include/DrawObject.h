@@ -40,8 +40,9 @@ public:
     void setShader(Shader *s) {shader = s; return;}
     Shader *getShader() {return shader;}
 
-private:
+    bool isVisible;
 
+private:
     Shader* shader;
 
     // VertexData* vertices;
@@ -82,10 +83,20 @@ public:
     void CreateShaderProgram();
 };
 
+//////////////////////////////////////////////////////////////////////////
+// Gridline class
+//////////////////////////////////////////////////////////////////////////
+enum Gridline_Dir {
+    OVERLAY,
+    XY_PLANE,
+    YZ_PLANE,
+    XZ_PLANE
+};
+
 class Gridlines : public DrawObject{
 public:
     //Gridlines(TestGLCanvas *canvas);
-    Gridlines(TestGLCanvas *canvas, GLfloat x = 0.5f, GLfloat y = 0.5f, GLfloat z=0.5f);
+    Gridlines(TestGLCanvas *canvas, GLfloat x = 0.5f, GLfloat y = 0.5f, GLfloat z=0.0f, Gridline_Dir dir = OVERLAY);
 
     // copy constructor
     Gridlines(const Gridlines &source);
@@ -96,6 +107,13 @@ public:
 
     void displayVertices();
 
+    void makeGridDefaultOverlay(std::vector<GLfloat> &vertices);
+    void makeGridMesh(GLfloat lim1, GLfloat lim2, GLfloat spa1, 
+            GLfloat spa2, Gridline_Dir direction, std::vector<GLfloat> &vertices);
+    Gridline_Dir direction;
+
+    int numSpaces1;  // number of spaces in direction1
+    int numSpaces2;  // number of spaces in direction2
 private:
     std::vector<GLfloat> vertices;
     GLfloat x_spa;

@@ -80,6 +80,7 @@ VertexData::VertexData(GLfloat x_pt, GLfloat y_pt, GLfloat z_pt){
 DrawObject::DrawObject(){
 	std::cout << "DrawObject constructor" << std::endl;
     shader = NULL;
+    isVisible = true;
 }
 
 /////////////////////////////////////////////////////////////////////////
@@ -331,97 +332,81 @@ void Triangle::CreateShaderProgram(){
 //////////////////////////////////////////////////////////////////////
 //  Gridline drawing aid routines
 //////////////////////////////////////////////////////////////////////
-Gridlines::Gridlines(TestGLCanvas *canvas, GLfloat x, GLfloat y, GLfloat z){
+Gridlines::Gridlines(TestGLCanvas *canvas, GLfloat x, GLfloat y, GLfloat z, Gridline_Dir dir){
     std::cout << "Gridlines constructor" << std::endl;
 
     // x_spa = 0.10f;
     // y_spa = 0.20f;
     // z_spa = 0.10f;
+    numSpaces1 = 10;
+    numSpaces2 = 10;
+    GLfloat spa1 = 0.25f;
+    GLfloat spa2 = 0.25f;
+    GLfloat lim1 = spa1 * numSpaces1;
+    GLfloat lim2 = spa2 * numSpaces2;
 
-    x_spa = x;
-    y_spa = y;
-    z_spa = z;
+    direction = dir;
 
-    //setShader(new Shader(myvertexShaderSource, myfragmentShaderSource));
-    setShader(new Shader("shaders/test.vert","shaders/test.frag"));
+    if(direction == OVERLAY) {
+        std::cout << "Making default overlay" << std::endl;
+        x_spa = x;
+        y_spa = y;
+        z_spa = z; 
+        setShader(new Shader("shaders/test.vert","shaders/test.frag")); 
+        makeGridDefaultOverlay(this->vertices);
+        isVisible = false;
 
-    // for centermost gridlines
-    vertices.push_back(-1.0f);
-    vertices.push_back(0.0f);
-    vertices.push_back(0.0f);
+    } else if(direction == XY_PLANE) {
+        std::cout << "XY_PLANE" << std::endl;
 
-    vertices.push_back(1.0f);
-    vertices.push_back(0.0f);
-    vertices.push_back(0.0f);
+        x_spa = x;
+        y_spa = y;
+        z_spa = 0.0f;
+        setShader(new Shader("shaders/drawgrid.vert","shaders/drawgrid.frag")); 
+        makeGridMesh(lim1, lim2, spa1, spa2, direction, this->vertices);
+        isVisible = false;
+        //        isVisible = true;
+        //displayVertices();
 
-    vertices.push_back(0.0f);
-    vertices.push_back(1.0f);
-    vertices.push_back(0.0f);
+    } else if(direction == XZ_PLANE) {
+        std::cout << "XZ_PLANE" << std::endl;
+        x_spa = x;
+        y_spa = 0.0f;
+        z_spa = z;
+        setShader(new Shader("shaders/drawgrid.vert","shaders/drawgrid.frag")); 
+        makeGridMesh(lim1, lim2, spa1, spa2, direction, this->vertices);
+        isVisible = false;
+        //isVisible = true;
 
-    vertices.push_back(0.0f);
-    vertices.push_back(-1.0f);
-    vertices.push_back(0.0f);
-
-    // for all other horiz lines
-    for(int i = 1; i < 1.0 / y_spa; i++) {
-        GLfloat top = 0.0f + (i * y_spa);
-
-        // horiz line
-        vertices.push_back(-1.0f);
-        vertices.push_back(top);
-        vertices.push_back(0.0f);
-
-        vertices.push_back(1.0f);
-        vertices.push_back(top);
-        vertices.push_back(0.0f);
-
-        vertices.push_back(-1.0f);
-        vertices.push_back(-top);
-        vertices.push_back(0.0f);
-
-        vertices.push_back(1.0f);
-        vertices.push_back(-top);
-        vertices.push_back(0.0f);
+    } else if(direction == YZ_PLANE) {
+        std::cout << "YZ_PLANE" << std::endl;
+        x_spa = 0.0f;
+        y_spa = y;
+        z_spa = z;
+        setShader(new Shader("shaders/drawgrid.vert","shaders/drawgrid.frag")); 
+        makeGridMesh(lim1, lim2, spa1, spa2, direction, this->vertices);
+        isVisible = false;
+        //isVisible = true;
+    } else {
+        std::cout << "Attempting to make invalid grid" << std::endl;
+        return;
     }
-
-    // for all other vert lines
-    for(int i = 1; i < 1.0 / x_spa; i++) {
-
-        GLfloat left = 0.0f + (i * x_spa);
-
-        // vert line
-        vertices.push_back(left);
-        vertices.push_back(1.0f);
-        vertices.push_back(0.0f);
-
-        vertices.push_back(left);
-        vertices.push_back(-1.0f);
-        vertices.push_back(0.0f);
-
-        vertices.push_back(-left);
-        vertices.push_back(1.0f);
-        vertices.push_back(0.0f);
-
-        vertices.push_back(-left);
-        vertices.push_back(-1.0f);
-        vertices.push_back(0.0f);
-
-    }
-
-    // displayVertices();
-    // int num_verts = vertices.size() / 3;
-    // std::cout << "Vertices.size(): " << vertices.size() << std::endl;
-    // std::cout << "Number of vertices: " << num_verts << std::endl;
 }
 
 // copy constructor
 Gridlines::Gridlines(const Gridlines &source){
+    std::cout << "Gridlines copy constructor" << std::endl;
     for(int i=0; i<source.vertices.size(); i++) {
         vertices.push_back(source.vertices[i]);
     }
+
+    numSpaces1 = source.numSpaces1;
+    numSpaces2 = source.numSpaces2;
+
      x_spa = source.x_spa;
      y_spa = source.y_spa;
      z_spa = source.z_spa;
+     direction = source.direction;
 }
 
 void Gridlines::Render(TestGLCanvas *orig_canvas)
@@ -496,6 +481,245 @@ void Gridlines::displayVertices(){
             std::cout << " , ";
             i++;
         }
+    }
+}
+
+void Gridlines::makeGridMesh(GLfloat lim1, GLfloat lim2, GLfloat spa1, 
+    GLfloat spa2, Gridline_Dir direction, std::vector<GLfloat> &vertices) {
+
+//    std::cout << lim1 << " " << lim2 << " " << spa1 << " " << spa2 << " " << direction << std::endl;
+//    std::cout << this->numSpaces1 <<  " " << this->numSpaces2 << std::endl;
+
+    if (direction == XY_PLANE) {
+        GLfloat x_val = lim1;
+        GLfloat y_val = lim2;
+        GLfloat z_val = 0.0f;
+
+        vertices.push_back(-lim1);
+        vertices.push_back(0.0f);
+        vertices.push_back(0.0f);
+
+        vertices.push_back(lim1);
+        vertices.push_back(0.0f);
+        vertices.push_back(0.0f);
+
+        for(int i = 1; i < numSpaces2; i++) {
+            vertices.push_back(-lim1);
+            vertices.push_back(0.0f+i*spa1);
+            vertices.push_back(0.0f);
+
+            vertices.push_back(lim1);
+            vertices.push_back(0.0f+i*spa1);
+            vertices.push_back(0.0f);
+
+            vertices.push_back(-lim1);
+            vertices.push_back(0.0f-i*spa1);
+            vertices.push_back(0.0f);
+
+            vertices.push_back(lim1);
+            vertices.push_back(0.0f-i*spa1);
+            vertices.push_back(0.0f);
+        }
+
+        vertices.push_back(0.0f);
+        vertices.push_back(-lim2);
+        vertices.push_back(0.0f);
+
+        vertices.push_back(0.0f);
+        vertices.push_back(lim2);
+        vertices.push_back(0.0f);
+
+        for(int i = 1; i < numSpaces1; i++) {
+            vertices.push_back(0.0f+i*spa2);
+            vertices.push_back(-lim2);
+            vertices.push_back(0.0f);
+
+            vertices.push_back(0.0f+i*spa2);
+            vertices.push_back(lim2);
+            vertices.push_back(0.0f);
+
+            vertices.push_back(0.0f-i*spa2);
+            vertices.push_back(-lim2);
+            vertices.push_back(0.0f);
+
+            vertices.push_back(0.0f-i*spa2);
+            vertices.push_back(lim2);
+            vertices.push_back(0.0f);
+        }
+
+    } else if (direction == YZ_PLANE) {
+        vertices.push_back(0.0f);
+        vertices.push_back(-lim1);
+        vertices.push_back(0.0f);
+
+        vertices.push_back(0.0f);
+        vertices.push_back(lim1);
+        vertices.push_back(0.0f);
+
+        for(int i = 1; i < numSpaces2; i++) {
+            vertices.push_back(0.0f);
+            vertices.push_back(-lim1);
+            vertices.push_back(0.0f+i*spa1);
+
+            vertices.push_back(0.0f);
+            vertices.push_back(lim1);
+            vertices.push_back(0.0f+i*spa1);
+
+            vertices.push_back(0.0f);
+            vertices.push_back(-lim1);
+            vertices.push_back(0.0f-i*spa1);
+
+            vertices.push_back(0.0f);
+            vertices.push_back(lim1);
+            vertices.push_back(0.0f-i*spa1);
+        }
+
+        vertices.push_back(0.0f);
+        vertices.push_back(0.0f);
+        vertices.push_back(-lim2);
+
+        vertices.push_back(0.0f);
+        vertices.push_back(0.0f);
+        vertices.push_back(lim2);
+
+        for(int i = 1; i < numSpaces1; i++) {
+            vertices.push_back(0.0f);
+            vertices.push_back(0.0f+i*spa2);
+            vertices.push_back(-lim2);
+
+            vertices.push_back(0.0f);
+            vertices.push_back(0.0f+i*spa2);
+            vertices.push_back(lim2);
+
+            vertices.push_back(0.0f);
+            vertices.push_back(0.0f-i*spa2);
+            vertices.push_back(-lim2);
+
+            vertices.push_back(0.0f);
+            vertices.push_back(0.0f-i*spa2);
+            vertices.push_back(lim2);
+        }
+
+    } else if (direction == XZ_PLANE) {
+        vertices.push_back(-lim1);
+        vertices.push_back(0.0f);
+        vertices.push_back(0.0f);
+
+        vertices.push_back(lim1);
+        vertices.push_back(0.0f);
+        vertices.push_back(0.0f);
+
+        for(int i = 1; i < numSpaces2; i++) {
+            vertices.push_back(-lim1);
+            vertices.push_back(0.0f);
+            vertices.push_back(0.0f+i*spa1);
+
+            vertices.push_back(lim1);
+            vertices.push_back(0.0f);
+            vertices.push_back(0.0f+i*spa1);
+
+            vertices.push_back(-lim1);
+            vertices.push_back(0.0f);
+            vertices.push_back(0.0f-i*spa1);
+
+            vertices.push_back(lim1);
+            vertices.push_back(0.0f);
+            vertices.push_back(0.0f-i*spa1);
+        }
+
+        vertices.push_back(0.0f);
+        vertices.push_back(0.0f);
+        vertices.push_back(-lim2);
+
+        vertices.push_back(0.0f);
+        vertices.push_back(0.0f);
+        vertices.push_back(lim2);
+
+        for(int i = 1; i < numSpaces1; i++) {
+            vertices.push_back(0.0f+i*spa2);
+            vertices.push_back(0.0f);
+            vertices.push_back(-lim2);
+
+            vertices.push_back(0.0f+i*spa2);
+            vertices.push_back(0.0f);
+            vertices.push_back(lim2);
+
+            vertices.push_back(0.0f-i*spa2);
+            vertices.push_back(0.0f);
+            vertices.push_back(-lim2);
+
+            vertices.push_back(0.0f-i*spa2);
+            vertices.push_back(0.0f);
+            vertices.push_back(lim2);
+        }
+    } else {
+        std::cout << "ERROR: making grid..." << std::endl;
+    }
+}
+
+void Gridlines::makeGridDefaultOverlay(std::vector<GLfloat> &vertices) {
+//    std::vector<GLfloat> vertices;
+    // for centermost gridlines
+    vertices.push_back(-1.0f);
+    vertices.push_back(0.0f);
+    vertices.push_back(0.0f);
+
+    vertices.push_back(1.0f);
+    vertices.push_back(0.0f);
+    vertices.push_back(0.0f);
+
+    vertices.push_back(0.0f);
+    vertices.push_back(1.0f);
+    vertices.push_back(0.0f);
+
+    vertices.push_back(0.0f);
+    vertices.push_back(-1.0f);
+    vertices.push_back(0.0f);
+
+    // for all other horiz lines
+    for(int i = 1; i < 1.0 / y_spa; i++) {
+        GLfloat top = 0.0f + (i * y_spa);
+
+        // horiz line
+        vertices.push_back(-1.0f);
+        vertices.push_back(top);
+        vertices.push_back(0.0f);
+
+        vertices.push_back(1.0f);
+        vertices.push_back(top);
+        vertices.push_back(0.0f);
+
+        vertices.push_back(-1.0f);
+        vertices.push_back(-top);
+        vertices.push_back(0.0f);
+
+        vertices.push_back(1.0f);
+        vertices.push_back(-top);
+        vertices.push_back(0.0f);
+    }
+
+    // for all other vert lines
+    for(int i = 1; i < 1.0 / x_spa; i++) {
+
+        GLfloat left = 0.0f + (i * x_spa);
+
+        // vert line
+        vertices.push_back(left);
+        vertices.push_back(1.0f);
+        vertices.push_back(0.0f);
+
+        vertices.push_back(left);
+        vertices.push_back(-1.0f);
+        vertices.push_back(0.0f);
+
+        vertices.push_back(-left);
+        vertices.push_back(1.0f);
+        vertices.push_back(0.0f);
+
+        vertices.push_back(-left);
+        vertices.push_back(-1.0f);
+        vertices.push_back(0.0f);
+
     }
 }
 

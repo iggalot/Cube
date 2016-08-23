@@ -44,6 +44,10 @@ public:
     void updateInfoBar();  // updates the information bar at bottom of window.
     void processCameraEvent(wxKeyEvent& event); // processes camera events
 
+    DrawObject* m_xy_grid;
+    DrawObject* m_yz_grid;
+    DrawObject* m_xz_grid;
+    
     DrawObject* m_gridlines;
     DrawObject* m_crosshair;
     TestGLContext* m_glContext;

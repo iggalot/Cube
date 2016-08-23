@@ -67,6 +67,10 @@ private:
     void OnViewOne(wxCommandEvent& event);
     void OnViewTwo(wxCommandEvent& event);
     void OnDrawSelect(wxCommandEvent& event);
+    void ToggleXYGrid(wxCommandEvent& event);
+    void ToggleXZGrid(wxCommandEvent& event);
+    void ToggleYZGrid(wxCommandEvent& event);
+    void ToggleOverlayGrid(wxCommandEvent& event);
 };
 
 // // Define the member selection frame
@@ -87,7 +91,11 @@ enum
     DRAW_SELECT = wxID_HIGHEST + 4,
     SpinTimer = wxID_HIGHEST + 5,
     VIEW_ONE = wxID_HIGHEST + 6,
-    VIEW_TWO = wxID_HIGHEST + 7
+    VIEW_TWO = wxID_HIGHEST + 7,
+    DRAW_XY_GRID = wxID_HIGHEST + 8,
+    DRAW_YZ_GRID = wxID_HIGHEST + 9,
+    DRAW_XZ_GRID = wxID_HIGHEST + 10,
+    DRAW_OVERLAY_GRID = wxID_HIGHEST + 11
 };
 
 // IMPLEMENT_APP(MyApp)
