@@ -7,6 +7,8 @@
 #ifndef _DRAWOBJECT_H
 #define _DRAWOBJECT_H
 
+#include </usr/include/glm/glm.hpp>
+
 // forward declarations
 class DrawObject;
 class TestGLCanvas;
@@ -41,6 +43,7 @@ public:
     Shader *getShader() {return shader;}
 
     bool isVisible;
+    glm::vec4 color;
 
 private:
     Shader* shader;
@@ -119,6 +122,19 @@ private:
     GLfloat x_spa;
     GLfloat y_spa;
     GLfloat z_spa;
+};
+
+class CursorObj : public DrawObject{
+public:
+    CursorObj(DrawObject* object);
+
+    void Render(TestGLCanvas* canvas);
+    void AddVertex();
+    void CreateShaderProgram();
+
+    DrawObject *obj;
+private:
+    std::vector<GLfloat> vertices;
 };
 
 #endif // _DRAWOBJECT_H

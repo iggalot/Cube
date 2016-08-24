@@ -81,6 +81,7 @@ DrawObject::DrawObject(){
 	std::cout << "DrawObject constructor" << std::endl;
     shader = NULL;
     isVisible = true;
+    color = glm::vec4(1.0f, 0.0f, 0.2f, 1.0f); // R G B Alpha
 }
 
 /////////////////////////////////////////////////////////////////////////
@@ -93,6 +94,7 @@ Crosshairs::Crosshairs(TestGLCanvas *canvas){
 
 //    setShader(new Shader(myvertexShaderSource, myfragmentShaderSource));
     setShader(new Shader());
+    color = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
 }
 
 void Crosshairs::Render(TestGLCanvas *orig_canvas)
@@ -140,7 +142,7 @@ void Crosshairs::Render(TestGLCanvas *orig_canvas)
     // Render
     glUseProgram(getShader()->getShaderProgNum());
  //   glUseProgram(shaderProgram);
-
+        
         // // Get the uniform locations
         GLint modelLoc = glGetUniformLocation(this->getShader()->getShaderProgNum(), "model");
         GLint viewLoc = glGetUniformLocation(this->getShader()->getShaderProgNum(), "view");
@@ -148,7 +150,12 @@ void Crosshairs::Render(TestGLCanvas *orig_canvas)
     
         glm::mat4 identity = glm::mat4(); // so that the cross hairs arent scaled when they vertices are passed to the shaders
 
+        GLint vertexColorLocation = glGetUniformLocation(this->getShader()->getShaderProgNum(), "vertexColor");
+
+
         // // Pass the matrices to the shader
+        glUniform4f(vertexColorLocation, color.x, color.y, color.z, 1.0f);
+
         glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(identity));
         glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(identity));
         glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(identity));
@@ -258,7 +265,10 @@ void Dice::CreateShaderProgram(){
 }
 
 
+
+////////////////////////////////////////////////////////////////////
 // Our basic triangle shape
+////////////////////////////////////////////////////////////////////
 void Triangle::Render(TestGLCanvas *orig_canvas) {
 
     // Set up vertex data (and buffer(s)) and attribute pointers
@@ -299,7 +309,11 @@ void Triangle::Render(TestGLCanvas *orig_canvas) {
     
         // std::cout << "modelLoc: " << modelLoc << "viewLoc: " << viewLoc << "projLoc: " << projLoc << std::endl;
 
+        GLint vertexColorLocation = glGetUniformLocation(this->getShader()->getShaderProgNum(), "vertexColor");
+
         // // Pass the matrices to the shader
+        glUniform4f(vertexColorLocation, color.x, color.y, color.z, 1.0f);
+
         glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(orig_canvas->getCamera()->modelMatrix));
         glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(orig_canvas->getCamera()->viewMatrix));
         glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(orig_canvas->getCamera()->projectionMatrix));
@@ -338,8 +352,8 @@ Gridlines::Gridlines(TestGLCanvas *canvas, GLfloat x, GLfloat y, GLfloat z, Grid
     // x_spa = 0.10f;
     // y_spa = 0.20f;
     // z_spa = 0.10f;
-    numSpaces1 = 10;
-    numSpaces2 = 10;
+    numSpaces1 = 20;
+    numSpaces2 = 20;
     GLfloat spa1 = 0.25f;
     GLfloat spa2 = 0.25f;
     GLfloat lim1 = spa1 * numSpaces1;
@@ -354,6 +368,7 @@ Gridlines::Gridlines(TestGLCanvas *canvas, GLfloat x, GLfloat y, GLfloat z, Grid
         z_spa = z; 
         setShader(new Shader("shaders/test.vert","shaders/test.frag")); 
         makeGridDefaultOverlay(this->vertices);
+        color = glm::vec4(1.0f, 1.0f, 0.0f, 1.0f);
         isVisible = false;
 
     } else if(direction == XY_PLANE) {
@@ -365,6 +380,8 @@ Gridlines::Gridlines(TestGLCanvas *canvas, GLfloat x, GLfloat y, GLfloat z, Grid
         setShader(new Shader("shaders/drawgrid.vert","shaders/drawgrid.frag")); 
         makeGridMesh(lim1, lim2, spa1, spa2, direction, this->vertices);
         isVisible = false;
+        color = glm::vec4(0.5f, 0.3f, 0.3f, 0.25f);
+
         //        isVisible = true;
         //displayVertices();
 
@@ -376,6 +393,7 @@ Gridlines::Gridlines(TestGLCanvas *canvas, GLfloat x, GLfloat y, GLfloat z, Grid
         setShader(new Shader("shaders/drawgrid.vert","shaders/drawgrid.frag")); 
         makeGridMesh(lim1, lim2, spa1, spa2, direction, this->vertices);
         isVisible = false;
+        color = glm::vec4(0.3f, 0.5f, 0.3f, 0.25f);
         //isVisible = true;
 
     } else if(direction == YZ_PLANE) {
@@ -386,6 +404,7 @@ Gridlines::Gridlines(TestGLCanvas *canvas, GLfloat x, GLfloat y, GLfloat z, Grid
         setShader(new Shader("shaders/drawgrid.vert","shaders/drawgrid.frag")); 
         makeGridMesh(lim1, lim2, spa1, spa2, direction, this->vertices);
         isVisible = false;
+        color = glm::vec4(0.3f, 0.3f, 0.5f, 0.25f);
         //isVisible = true;
     } else {
         std::cout << "Attempting to make invalid grid" << std::endl;
@@ -403,10 +422,11 @@ Gridlines::Gridlines(const Gridlines &source){
     numSpaces1 = source.numSpaces1;
     numSpaces2 = source.numSpaces2;
 
-     x_spa = source.x_spa;
-     y_spa = source.y_spa;
-     z_spa = source.z_spa;
-     direction = source.direction;
+    color = source.color;
+    x_spa = source.x_spa;
+    y_spa = source.y_spa;
+    z_spa = source.z_spa;
+    direction = source.direction;
 }
 
 void Gridlines::Render(TestGLCanvas *orig_canvas)
@@ -451,7 +471,11 @@ void Gridlines::Render(TestGLCanvas *orig_canvas)
     
         // std::cout << "modelLoc: " << modelLoc << "viewLoc: " << viewLoc << "projLoc: " << projLoc << std::endl;
 
+        GLint vertexColorLocation = glGetUniformLocation(this->getShader()->getShaderProgNum(), "vertexColor");
+
         // // Pass the matrices to the shader
+     glUniform4f(vertexColorLocation, color.x, color.y, color.z, 1.0f);
+
         glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(orig_canvas->getCamera()->modelMatrix));
         glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(orig_canvas->getCamera()->viewMatrix));
         glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(orig_canvas->getCamera()->projectionMatrix));
@@ -729,4 +753,27 @@ void Gridlines::AddVertex(){
 
 void Gridlines::CreateShaderProgram(){
     std::cout << "In gridlines Create Shader Program: "  << std::endl;
+}
+
+
+////////////////////////////////////////////////////////
+//  Our cursor object
+////////////////////////////////////////////////////////
+
+//constructor
+CursorObj::CursorObj(DrawObject* object) {
+    std::cout << "Create our cursor object" << std::endl;
+    obj = object;
+}
+
+void CursorObj::Render(TestGLCanvas *orig_canvas) {
+    
+}
+
+void CursorObj::AddVertex(){
+    std::cout << "Add vertex for cursor object" << std::endl;
+}
+
+void CursorObj::CreateShaderProgram(){
+    std::cout << "In cursor object Create Shader Program: "  << std::endl;
 }

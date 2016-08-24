@@ -83,6 +83,7 @@ TestGLCanvas::TestGLCanvas(wxWindow *parent, int *attribList)
     m_crosshair = NULL;
     m_gridlines = NULL;
     m_camera = NULL;
+    m_cursor = NULL;  // our cursor object
 
 //    m_crosshair = new Crosshairs(this);
 
@@ -507,6 +508,9 @@ void TestGLCanvas::CreateDrawObj() {
         m_yz_grid = new Gridlines(this, 0.25f, 0.10f, 0.10f, YZ_PLANE);
         drawObjects.push_back(m_yz_grid);
     }
+
+    m_cursor = new CursorObj();
+    
 
     // Add a drawing item to our list to test (this is the dice from the TestGLContext)
 }

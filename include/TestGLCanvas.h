@@ -48,6 +48,7 @@ public:
     DrawObject* m_yz_grid;
     DrawObject* m_xz_grid;
     
+    DrawObject* m_cursor;
     DrawObject* m_gridlines;
     DrawObject* m_crosshair;
     TestGLContext* m_glContext;
