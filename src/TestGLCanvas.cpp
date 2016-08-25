@@ -218,6 +218,12 @@ void TestGLCanvas::OnPaint(wxPaintEvent& WXUNUSED(event))
         if(drawobj->isVisible)
             drawobj->Render(this);
     }
+
+    //render our cursor object -- not part of our drawObjects array because it 
+    // will change based on user selection an UI state.
+    if(m_cursor != NULL)
+        m_cursor->Render(this);
+
         //This line will reinstall the spinning cube and the basic triangle, in lieu of
         // the more general drawing object inheritance object
 //        GetContext(this).DrawRotatedCube(m_xangle, m_yangle);
@@ -509,7 +515,10 @@ void TestGLCanvas::CreateDrawObj() {
         drawObjects.push_back(m_yz_grid);
     }
 
-    m_cursor = new CursorObj();
+    m_cursor = new CursorObj(new Gridlines(this, 0.25f, 0.10f, 0.10f, XY_PLANE));
+    ((CursorObj*) m_cursor)->obj->color = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
+//    m_cursor->scale = 0.f;
+    ((Gridlines*)((CursorObj*) m_cursor)->obj)->scaleObj(0.05f);
     
 
     // Add a drawing item to our list to test (this is the dice from the TestGLContext)

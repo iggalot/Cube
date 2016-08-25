@@ -82,7 +82,18 @@ DrawObject::DrawObject(){
     shader = NULL;
     isVisible = true;
     color = glm::vec4(1.0f, 0.0f, 0.2f, 1.0f); // R G B Alpha
+    scale = 1.0f; // our global scale factor
+//    insertPt = new Point();
 }
+
+// // copy constructor
+// DrawObject::DrawObject(const DrawObject &source){
+//     std::cout << "DrawObject copy constructor" << std::endl;
+
+//     shader = source.shader;
+//     isVisible = source.isVisible;
+//     color = source.color;
+// }
 
 /////////////////////////////////////////////////////////////////////////
 //  Crosshair drawing aid object
@@ -747,6 +758,14 @@ void Gridlines::makeGridDefaultOverlay(std::vector<GLfloat> &vertices) {
     }
 }
 
+// scales the vertices of the object
+void Gridlines::scaleObj(GLfloat scale_factor) {
+    this->scale = scale_factor;
+    for(int i = 0; i < vertices.size(); i++) {
+        vertices[i] = vertices[i] * scale_factor;
+    }
+}
+
 void Gridlines::AddVertex(){
     std::cout << "Add vertex for gridlines" << std::endl;
 }
@@ -767,7 +786,8 @@ CursorObj::CursorObj(DrawObject* object) {
 }
 
 void CursorObj::Render(TestGLCanvas *orig_canvas) {
-    
+    obj->Render(orig_canvas);
+    //std::cout << "drawing cursor" << std::endl;
 }
 
 void CursorObj::AddVertex(){

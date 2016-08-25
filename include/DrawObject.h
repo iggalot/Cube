@@ -42,12 +42,13 @@ public:
     void setShader(Shader *s) {shader = s; return;}
     Shader *getShader() {return shader;}
 
+    GLfloat scale;
     bool isVisible;
     glm::vec4 color;
 
 private:
     Shader* shader;
-
+    Point* insertPt;
     // VertexData* vertices;
     // VertexData* last;
     // VertexData* head;  
@@ -99,7 +100,8 @@ enum Gridline_Dir {
 class Gridlines : public DrawObject{
 public:
     //Gridlines(TestGLCanvas *canvas);
-    Gridlines(TestGLCanvas *canvas, GLfloat x = 0.5f, GLfloat y = 0.5f, GLfloat z=0.0f, Gridline_Dir dir = OVERLAY);
+    Gridlines(TestGLCanvas *canvas, GLfloat x = 0.5f, GLfloat y = 0.5f, GLfloat z=0.0f, 
+        Gridline_Dir dir = OVERLAY);
 
     // copy constructor
     Gridlines(const Gridlines &source);
@@ -115,8 +117,13 @@ public:
             GLfloat spa2, Gridline_Dir direction, std::vector<GLfloat> &vertices);
     Gridline_Dir direction;
 
+    void scaleObj(GLfloat scale_factor);
+
     int numSpaces1;  // number of spaces in direction1
     int numSpaces2;  // number of spaces in direction2
+
+    GLfloat scale;
+
 private:
     std::vector<GLfloat> vertices;
     GLfloat x_spa;
