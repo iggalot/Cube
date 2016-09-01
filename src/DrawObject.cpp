@@ -83,8 +83,32 @@ DrawObject::DrawObject(){
     isVisible = true;
     color = glm::vec4(1.0f, 0.0f, 0.2f, 1.0f); // R G B Alpha
     scale = 1.0f; // our global scale factor
-//    insertPt = new Point();
+    insertPt = new Point();
 }
+
+// translate vertices by the specified Point amount
+void DrawObject::translateVertices(Point point, std::vector<GLfloat> &vertices){
+    std::cout << point.Print() << std::endl;
+
+    for(int i = 0; (i < vertices.size()); i=i+3) {
+//        std::cout << i << " " << vertices.size() << std::endl;
+        vertices[i]   = vertices[i]   + point.getX(); // x coord
+        vertices[i+1] = vertices[i+1] + point.getY(); // y coord
+        vertices[i+2] = vertices[i+2] + point.getY(); // y coord
+    }
+}
+
+//scales the vertices of the object
+void DrawObject::scaleObj(GLfloat scale_factor, std::vector<GLfloat> &vertices) {
+    this->scale = scale_factor;
+    std::cout << " -- in DrawObj::scaleObj " << scale_factor << " " << vertices.size() << std::endl;
+    for(int i = 0; i < vertices.size(); i++) {
+//        std::cout << vertices[i];
+        vertices[i] = vertices[i] * scale_factor;
+//        std::cout << " " << vertices[i] << std::endl;
+    }
+}
+
 
 // // copy constructor
 // DrawObject::DrawObject(const DrawObject &source){
@@ -758,14 +782,6 @@ void Gridlines::makeGridDefaultOverlay(std::vector<GLfloat> &vertices) {
     }
 }
 
-// scales the vertices of the object
-void Gridlines::scaleObj(GLfloat scale_factor) {
-    this->scale = scale_factor;
-    for(int i = 0; i < vertices.size(); i++) {
-        vertices[i] = vertices[i] * scale_factor;
-    }
-}
-
 void Gridlines::AddVertex(){
     std::cout << "Add vertex for gridlines" << std::endl;
 }
@@ -783,6 +799,48 @@ void Gridlines::CreateShaderProgram(){
 CursorObj::CursorObj(DrawObject* object) {
     std::cout << "Create our cursor object" << std::endl;
     obj = object;
+    lastPt = new Point();
+    ray_nds = glm::vec3(0.0f, 0.0f, 0.0f);
+    ray_clip = glm::vec4(0.0f, 0.0f, 0.0f, 0.0f);
+    ray_eye = glm::vec4(0.0f, 0.0f, 0.0f, 0.0f);
+    ray_world = glm::vec3(0.0f, 0.0f, 0.0f);
+}
+
+void CursorObj::moveCursor(TestGLCanvas *canvas, Point* new_pt) {
+    std::cout << "-- Moving cursor" << std::endl;
+
+    //Point temp_pt;
+
+    // GLfloat x_temp = new_pt->getX() - this->lastPt->getX();
+    // GLfloat y_temp = new_pt->getY() - this->lastPt->getY();
+    // GLfloat z_temp = new_pt->getZ() - this->lastPt->getZ();
+
+    // std::cout << "NewPt:" << new_pt->getX() << " " << new_pt->getY() << " " << new_pt->getZ() << std::endl;
+    // std::cout << "lastPt:" << lastPt->getX() << " " << lastPt->getY() << " " << lastPt->getZ() << std::endl;
+
+    // std::cout << x_temp << " " << y_temp << " " << z_temp << std::endl;
+
+
+    // temp_pt.setX(new_pt->getX() - this->lastPt->getX());
+    // temp_pt.setY(new_pt->getY() - this->lastPt->getY());
+    // temp_pt.setZ(new_pt->getZ() - this->lastPt->getZ());
+//    std::cout << "Current Pt: " << this->obj->getInsertPt()->Print() << std::endl;
+    std::cout << "Last Pt: " << this->lastPt->Print() << std::endl;
+    std::cout << new_pt->Print() << std::endl;
+    // std::cout << temp_pt.Print() << std::endl;
+    // std::cout << lastPt->Print() << std::endl;
+    // this->lastPt = new_pt;
+    // std::cout << lastPt->Print() << std::endl;
+
+    this->normDeviceCoords(canvas, this->ray_nds);
+    this->homogenClipCoords(this->ray_nds, this->ray_clip);
+    this->eyeCameraCoords(canvas, ray_eye);
+    this->worldCoords(canvas, ray_world);
+    displayRayCastInfo();
+
+    this->obj->translateVertices(*new_pt, this->obj->vertices);
+
+
 }
 
 void CursorObj::Render(TestGLCanvas *orig_canvas) {
@@ -796,4 +854,44 @@ void CursorObj::AddVertex(){
 
 void CursorObj::CreateShaderProgram(){
     std::cout << "In cursor object Create Shader Program: "  << std::endl;
+}
+
+// returns 3D Normalized Device coordinates (-1.0:1.0, -1.0:1.0, -1.0:1.0)
+// based on a cursor's current 2D Viewport coords (0:width, height:0)
+void CursorObj::normDeviceCoords(TestGLCanvas *canvas, glm::vec3 &ray_nds) {
+    float x = (2.0f * canvas->getCurrMousePos()->getX()) / canvas->CANVAS_WIDTH - 1.0f;
+    float y = 1.0f - (2.0f * canvas->getCurrMousePos()->getY()) / canvas->CANVAS_HEIGHT;
+    float z = 1.0f;
+    ray_nds = glm::vec3 (x,y,z);
+
+    return;
+}
+
+// returns 4D Homogeneous Clip Coords (-1:1, -1:1, -1:1, -1:1)
+void CursorObj::homogenClipCoords(glm::vec3 ray, glm::vec4 &ray_clip){
+    ray_clip = glm::vec4(ray.x, ray.y, -1.0f, 1.0f);
+    return;
+}
+
+// returns 4D Eye (Camera) Coords in (-x:x, -y:y, -z:z, -w:w)
+void CursorObj::eyeCameraCoords(TestGLCanvas *canvas, glm::vec4 &ray_eye) {
+    ray_eye = glm::inverse(canvas->getCamera()->projectionMatrix) * ray_clip;
+    return;
+} 
+
+// returns 4D World Coords in (-x:x, -y:y, -z:z, -w:w)
+void CursorObj::worldCoords(TestGLCanvas *canvas, glm::vec3 &ray_world) {
+    glm::vec4 temp = glm::inverse(canvas->getCamera()->viewMatrix) * ray_eye;
+    ray_world = glm::vec3(temp.x, temp.y, temp.z);
+    ray_world = glm::normalize(ray_world);
+    return;
+} 
+
+void CursorObj::displayRayCastInfo(){
+    std::cout << "===============================================================" << std::endl;
+    std::cout << "normDeviceCoords: " << ray_nds.x << " , " << ray_nds.y << " , " << ray_nds.z << std::endl;
+    std::cout << "rayClipCoords: " << ray_clip.x << " , " << ray_clip.y << " , " << ray_clip.z << " , " << ray_clip.w << std::endl;
+    std::cout << "eyeCameraCoords: " << ray_eye.x << " , " << ray_eye.y << " , " << ray_eye.z << " , " << ray_eye.w << std::endl;
+    std::cout << "worldCoords: " << ray_world.x << " , " << ray_world.y << " , " << ray_world.z << std::endl;
+    std::cout << "===============================================================" << std::endl;
 }

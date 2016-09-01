@@ -10,6 +10,10 @@
 #include <vector>
 #include "wx/glcanvas.h"
 
+// Include GLM
+#include </usr/include/glm/glm.hpp>
+//#include </usr/include/glm/gtc/matrix_transform.hpp>
+
 // forward declaration
 //class wxGLCanvas;
 class MyFrame;
@@ -44,6 +48,8 @@ public:
     void updateInfoBar();  // updates the information bar at bottom of window.
     void processCameraEvent(wxKeyEvent& event); // processes camera events
 
+    void normDeviceCoords(); // transforms our mouse position into normalized device coords.
+
     DrawObject* m_xy_grid;
     DrawObject* m_yz_grid;
     DrawObject* m_xz_grid;
@@ -59,6 +65,7 @@ private:
     GLuint m_current_drawnum;
     Point* m_currMousePos;
     MyFrame *myParentFrame;
+    glm::vec3 *ray_nds;
     
     void OnPaint(wxPaintEvent& event);
     void Spin(float xSpin, float ySpin);

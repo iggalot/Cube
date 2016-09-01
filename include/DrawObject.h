@@ -7,6 +7,7 @@
 #ifndef _DRAWOBJECT_H
 #define _DRAWOBJECT_H
 
+#include <vector>
 #include </usr/include/glm/glm.hpp>
 
 // forward declarations
@@ -39,14 +40,21 @@ public:
     virtual void Render(TestGLCanvas* canvas) = 0;
     virtual void CreateShaderProgram() = 0;
 
+    void translateVertices(Point point, std::vector<GLfloat> &vertices);
+    void scaleObj(GLfloat scale_factor, std::vector<GLfloat> &vertices);
+
     void setShader(Shader *s) {shader = s; return;}
     Shader *getShader() {return shader;}
+    std::vector<GLfloat> getVertices() {return vertices;}
+    Point *getInsertPt() {return insertPt;}
 
     GLfloat scale;
     bool isVisible;
     glm::vec4 color;
+    std::vector<GLfloat> vertices;
 
 private:
+
     Shader* shader;
     Point* insertPt;
     // VertexData* vertices;
@@ -66,6 +74,8 @@ public:
     void Render(TestGLCanvas* canvas);
     void AddVertex();
     void CreateShaderProgram();
+
+//    std::vector<GLfloat> vertices;
 };
 
 class Dice : public DrawObject
@@ -76,6 +86,8 @@ public:
     void Render(TestGLCanvas* canvas);
     void AddVertex();
     void CreateShaderProgram();
+
+//    std::vector<GLfloat> vertices;
 };
 
 class Triangle : public DrawObject{
@@ -85,6 +97,8 @@ public:
     void Render(TestGLCanvas* canvas);
     void AddVertex();
     void CreateShaderProgram();
+
+//    std::vector<GLfloat> vertices;
 };
 
 //////////////////////////////////////////////////////////////////////////
@@ -117,15 +131,16 @@ public:
             GLfloat spa2, Gridline_Dir direction, std::vector<GLfloat> &vertices);
     Gridline_Dir direction;
 
-    void scaleObj(GLfloat scale_factor);
+
 
     int numSpaces1;  // number of spaces in direction1
     int numSpaces2;  // number of spaces in direction2
 
     GLfloat scale;
 
+//    std::vector<GLfloat> vertices;
+
 private:
-    std::vector<GLfloat> vertices;
     GLfloat x_spa;
     GLfloat y_spa;
     GLfloat z_spa;
@@ -139,9 +154,28 @@ public:
     void AddVertex();
     void CreateShaderProgram();
 
+    void moveCursor(TestGLCanvas *canvas, Point* offset);
+
+    // ray-casting methods
+    void normDeviceCoords(TestGLCanvas *canvas, glm::vec3 &ray_coord); // transforms our mouse position into normalized device coords.
+    void homogenClipCoords(glm::vec3 ray, glm::vec4 &ray_clip_coord);
+    void eyeCameraCoords(TestGLCanvas *canvas, glm::vec4 &ray_eye);
+    void worldCoords(TestGLCanvas *canvas, glm::vec3 &ray_world);
+    void displayRayCastInfo();  // displays current ray values
+
     DrawObject *obj;
+    Point* lastPt;  // the previous cursor point
+
+ //   std::vector<GLfloat> vertices;
+
+    // our ray cast routine variables
+    glm::vec3 ray_nds;  // normalized device coords based on cursor position
+    glm::vec4 ray_clip; // homogeneous clip coords
+    glm::vec4 ray_eye;  // eye (camera) coordinates
+    glm::vec3 ray_world; // world coordinates
+
 private:
-    std::vector<GLfloat> vertices;
+
 };
 
 #endif // _DRAWOBJECT_H

@@ -11,7 +11,7 @@
 
 class Point {
 public:
-	Point(float x_pt=0, float y_pt=0, float z_pt=0) {
+	Point(float x_pt=0.0f, float y_pt=0.0f, float z_pt=0.0f) {
 		x = x_pt;
 		y = y_pt;
 		z = z_pt;
@@ -34,16 +34,16 @@ public:
 
 	// overloaded operators
   	Point operator=(const Point &rhs) {
-    // Check for self-assignment!
-    if (this == &rhs)      // Same object?
-      return *this;        // Yes, so skip assignment, and just return *this.
+	    // Check for self-assignment!
+    	if (this == &rhs)      // Same object?
+	      return *this;        // Yes, so skip assignment, and just return *this.
 
-  	this->x += rhs.getX();
-  	this->y += rhs.getY();
-  	this->z += rhs.getZ();
+  		this->x += rhs.getX();
+  		this->y += rhs.getY();
+  		this->z += rhs.getZ();
 
-    return *this;
-  }
+    	return *this;
+  	}
 
 	Point operator+(const Point& b) {
 		float x_temp = getX() + b.getX();

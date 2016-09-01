@@ -364,21 +364,21 @@ void TestGLCanvas::OnMouseWheel(wxMouseEvent& event)
 
 void TestGLCanvas::OnMouseMove(wxMouseEvent& event)
 {
-    if(getCamera()->getCameraState()) {
-//        std::cout << "==============" << std::endl;
-        Point* last_point = getCurrMousePos();  // the old point
-        Point curr_point = Point(event.GetX(), event.GetY(), 0);
-        Point dist_moved = curr_point - *last_point;
-
-        // std::cout << "curr point" << curr_point.Print() << std::endl;
-        // std::cout << "last point" << (*(last_point)).Print() << std::endl;;
-        // std::cout << "dist moved" << dist_moved.Print() << std::endl; 
-
-        getCamera()->ProcessMouseMovement((GLfloat)dist_moved.getX(), (GLfloat)-dist_moved.getY(), TRUE);
-    }
+    //        std::cout << "==============" << std::endl;
+    Point* last_point = getCurrMousePos();  // the old point
+    Point curr_point = Point(event.GetX(), event.GetY(), 0);
+    Point dist_moved = curr_point - *last_point;
+    // std::cout << "curr point" << curr_point.Print() << std::endl;
+    // std::cout << "last point" << (*(last_point)).Print() << std::endl;;
+    // std::cout << "dist moved" << dist_moved.Print() << std::endl; 
 
     setCurrMousePos(event.GetX(), event.GetY(), 0);
 
+    ((CursorObj*) m_cursor)->moveCursor(this, &dist_moved);
+
+    if(getCamera()->getCameraState()) {
+        getCamera()->ProcessMouseMovement((GLfloat)dist_moved.getX(), (GLfloat)-dist_moved.getY(), TRUE);
+    }
     // Point p1 = Point(1, 1, 1);
     // Point p2 = Point(2, 3, 4);
     // Point p3, p4;
@@ -403,9 +403,9 @@ void TestGLCanvas::updateInfoBar() {
 
     // Coord info
     str += "Coord: ";
-    str += std::to_string(getCurrMousePos()->getX()); 
-    str += " "; 
-    str += std::to_string(getCurrMousePos()->getY());
+    str += std::to_string((int) getCurrMousePos()->getX()); 
+    str += " , "; 
+    str += std::to_string((int)getCurrMousePos()->getY());
     str += "      ";
     str += "Camera: ";
 
@@ -515,10 +515,16 @@ void TestGLCanvas::CreateDrawObj() {
         drawObjects.push_back(m_yz_grid);
     }
 
+    std::cout << "-- Create cursor" << std::endl;
     m_cursor = new CursorObj(new Gridlines(this, 0.25f, 0.10f, 0.10f, XY_PLANE));
     ((CursorObj*) m_cursor)->obj->color = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
 //    m_cursor->scale = 0.f;
-    ((Gridlines*)((CursorObj*) m_cursor)->obj)->scaleObj(0.05f);
+    ((CursorObj*) m_cursor)->obj->scaleObj(0.05f, ((CursorObj*) m_cursor)->obj->vertices);
+    ((CursorObj*) m_cursor)->obj->translateVertices(Point(0.75f, 0.75f, 0.0f), ((CursorObj*) m_cursor)->obj->vertices);
+
+    // ((Gridlines*)((CursorObj*) m_cursor)->obj)->scaleObj(0.05f);
+    // ((Gridlines*)((CursorObj*) m_cursor)->obj)->translateVertices(
+    //     Point(0.75f, 0.75f, 0.5f), ((Gridlines*)((CursorObj*) m_cursor)->obj)->vertices );
     
 
     // Add a drawing item to our list to test (this is the dice from the TestGLContext)
