@@ -32,7 +32,7 @@
 #include </usr/include/glm/gtc/matrix_transform.hpp>
 #include </usr/include/glm/gtc/type_ptr.hpp>
 // #include </usr/include/glm/ext.hpp>  // for displaying vectors
-// #include </usr/include/glm/gtx/string_cast.hpp>  // for displaying vectors
+#include </usr/include/glm/gtx/string_cast.hpp>  // for displaying vectors
 
 
 #include "../include/cube.h"
@@ -859,9 +859,9 @@ void CursorObj::CreateShaderProgram(){
 // returns 3D Normalized Device coordinates (-1.0:1.0, -1.0:1.0, -1.0:1.0)
 // based on a cursor's current 2D Viewport coords (0:width, height:0)
 void CursorObj::normDeviceCoords(TestGLCanvas *canvas, glm::vec3 &ray_nds) {
-    float x = (2.0f * canvas->getCurrMousePos()->getX()) / canvas->CANVAS_WIDTH - 1.0f;
-    float y = 1.0f - (2.0f * canvas->getCurrMousePos()->getY()) / canvas->CANVAS_HEIGHT;
-    float z = 1.0f;
+    float x = (GLfloat)((2.0f * canvas->getCurrMousePos()->getX()) / canvas->CANVAS_WIDTH - 1.0f);
+    float y = (GLfloat)(1.0f - (2.0f * canvas->getCurrMousePos()->getY()) / canvas->CANVAS_HEIGHT);
+    float z = (GLfloat)(1.0f);
     ray_nds = glm::vec3 (x,y,z);
 
     return;
@@ -875,15 +875,59 @@ void CursorObj::homogenClipCoords(glm::vec3 ray, glm::vec4 &ray_clip){
 
 // returns 4D Eye (Camera) Coords in (-x:x, -y:y, -z:z, -w:w)
 void CursorObj::eyeCameraCoords(TestGLCanvas *canvas, glm::vec4 &ray_eye) {
+//    std::cout << "Projection Matrix: " << glm::to_string(canvas->getCamera()->projectionMatrix) << std::endl;
     ray_eye = glm::inverse(canvas->getCamera()->projectionMatrix) * ray_clip;
+    ray_eye = glm::vec4(ray_eye.x, ray_eye.y, -1.0f, 0.0f);
     return;
 } 
 
 // returns 4D World Coords in (-x:x, -y:y, -z:z, -w:w)
 void CursorObj::worldCoords(TestGLCanvas *canvas, glm::vec3 &ray_world) {
-    glm::vec4 temp = glm::inverse(canvas->getCamera()->viewMatrix) * ray_eye;
+//    std::cout << "View Matrix: " << glm::to_string(canvas->getCamera()->viewMatrix) << std::endl;
+    glm::vec4 temp = (glm::inverse(canvas->getCamera()->viewMatrix) * ray_eye);
+//    std::cout << "- temp Vec4: " << glm::to_string(temp) << std::endl;
+
     ray_world = glm::vec3(temp.x, temp.y, temp.z);
+//    std::cout << "- ray_world: " << glm::to_string(temp) << std::endl;
+
     ray_world = glm::normalize(ray_world);
+//    std::cout << "- normalized ray_world Vec4: " << glm::to_string(ray_world) << std::endl;
+
+
+
+ //   glm::vec3 intersect_point = ray_intersect_plane(GraphicsManagerInfo->CameraObj->Position, ray_wor, GraphicsManagerInfo->DrawingGridLine->GetPlane());
+    // assuming xy plane intersection
+    GLfloat x = 0.0f;
+    GLfloat y = 0.0f;
+    GLfloat z = 0.0f;
+    glm::vec3 normalVec = glm::vec3(0.0f, 0.0f, 1.0f);
+    glm::vec3 cameraPt = glm::vec3(canvas->getCamera()->getPos());
+
+ //   GLfloat denom = glm::dot(ray_world, normalVec);
+ //   GLfloat numerator = glm::dot(cameraPt, normalVec);
+ //   GLfloat t = - (numerator) / denom;
+ 
+    // for XY Plane intersection
+    GLfloat t = (z - canvas->getCamera()->getPos().z / ray_world.z);
+    // for XZ Plane intersection
+//    GLfloat t = (y - canvas->getCamera()->getPos().y / ray_world.y);
+    // for YZ Plane intersection
+//    GLfloat t = (x - canvas->getCamera()->getPos().x / ray_world.x);
+
+    // x = canvas->getCamera()->getPos().x + ray_world.x * t;
+    // y = canvas->getCamera()->getPos().y + ray_world.y * t;
+    // z = canvas->getCamera()->getPos().z + ray_world.z * t;
+    // std::cout << "coords: " << x << "," << y << "," << z << std::endl;
+
+    // std::cout << "CameraPt: " << cameraPt.x << " , " << cameraPt.y << " , " << cameraPt.z << std::endl;
+    // std::cout << "scale factor: " << t << std::endl;
+    intersectPt = cameraPt + ray_world * t;
+
+    std::cout << "intersectPt: " << intersectPt.x << " , " << intersectPt.y << " , " << intersectPt.z << std::endl;
+    // std::cout << "x: " << canvas->getCamera()->getPos().x + (t * ray_world.x)
+    //     << " , " << canvas->getCamera()->getPos().y + (t * ray_world.y)
+    //     << " , " << canvas->getCamera()->getPos().z + (t * ray_world.z) << std::endl;
+
     return;
 } 
 
@@ -892,6 +936,6 @@ void CursorObj::displayRayCastInfo(){
     std::cout << "normDeviceCoords: " << ray_nds.x << " , " << ray_nds.y << " , " << ray_nds.z << std::endl;
     std::cout << "rayClipCoords: " << ray_clip.x << " , " << ray_clip.y << " , " << ray_clip.z << " , " << ray_clip.w << std::endl;
     std::cout << "eyeCameraCoords: " << ray_eye.x << " , " << ray_eye.y << " , " << ray_eye.z << " , " << ray_eye.w << std::endl;
-    std::cout << "worldCoords: " << ray_world.x << " , " << ray_world.y << " , " << ray_world.z << std::endl;
+    std::cout << "rayCoords: " << ray_world.x << " , " << ray_world.y << " , " << ray_world.z << std::endl;
     std::cout << "===============================================================" << std::endl;
 }

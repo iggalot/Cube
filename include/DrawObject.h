@@ -173,6 +173,7 @@ public:
     glm::vec4 ray_clip; // homogeneous clip coords
     glm::vec4 ray_eye;  // eye (camera) coordinates
     glm::vec3 ray_world; // world coordinates
+    glm::vec3 intersectPt;  // the current intersect point of the ray_cast and current plane
 
 private:
 
