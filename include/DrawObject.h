@@ -40,8 +40,9 @@ public:
     virtual void Render(TestGLCanvas* canvas) = 0;
     virtual void CreateShaderProgram() = 0;
 
-    void translateVertices(Point point, std::vector<GLfloat> &vertices);
+    void translateVertices(glm::vec3 offsetVec, std::vector<GLfloat> &vertices);
     void scaleObj(GLfloat scale_factor, std::vector<GLfloat> &vertices);
+    glm::vec3 convertMouseToWorldCoord(TestGLCanvas* canvas, glm::vec3 curr_vec3);
 
     void setShader(Shader *s) {shader = s; return;}
     Shader *getShader() {return shader;}
@@ -154,7 +155,7 @@ public:
     void AddVertex();
     void CreateShaderProgram();
 
-    void moveCursor(TestGLCanvas *canvas, Point* offset);
+    void moveCursor(TestGLCanvas *canvas, Point curr_point);
 
     // ray-casting methods
     void normDeviceCoords(TestGLCanvas *canvas, glm::vec3 &ray_coord); // transforms our mouse position into normalized device coords.
@@ -164,7 +165,7 @@ public:
     void displayRayCastInfo();  // displays current ray values
 
     DrawObject *obj;
-    Point* lastPt;  // the previous cursor point
+    glm::vec3 lastPt;  // the previous cursor point
 
  //   std::vector<GLfloat> vertices;
 

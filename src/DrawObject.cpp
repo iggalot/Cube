@@ -87,21 +87,21 @@ DrawObject::DrawObject(){
 }
 
 // translate vertices by the specified Point amount
-void DrawObject::translateVertices(Point point, std::vector<GLfloat> &vertices){
-    std::cout << point.Print() << std::endl;
+void DrawObject::translateVertices(glm::vec3 point, std::vector<GLfloat> &vertices){
+//    std::cout << glm::to_string(point) << std::endl;
 
     for(int i = 0; (i < vertices.size()); i=i+3) {
 //        std::cout << i << " " << vertices.size() << std::endl;
-        vertices[i]   = vertices[i]   + point.getX(); // x coord
-        vertices[i+1] = vertices[i+1] + point.getY(); // y coord
-        vertices[i+2] = vertices[i+2] + point.getY(); // y coord
+        vertices[i]   = vertices[i]   + point.x; // x coord
+        vertices[i+1] = vertices[i+1] + point.y; // y coord
+        vertices[i+2] = vertices[i+2] + point.z; // y coord
     }
 }
 
 //scales the vertices of the object
 void DrawObject::scaleObj(GLfloat scale_factor, std::vector<GLfloat> &vertices) {
     this->scale = scale_factor;
-    std::cout << " -- in DrawObj::scaleObj " << scale_factor << " " << vertices.size() << std::endl;
+//    std::cout << " -- in DrawObj::scaleObj " << scale_factor << " " << vertices.size() << std::endl;
     for(int i = 0; i < vertices.size(); i++) {
 //        std::cout << vertices[i];
         vertices[i] = vertices[i] * scale_factor;
@@ -109,6 +109,25 @@ void DrawObject::scaleObj(GLfloat scale_factor, std::vector<GLfloat> &vertices) 
     }
 }
 
+// takes window coords and converts to World Coord using similar algorithm as 
+// our ray cast conversion.
+glm::vec3 DrawObject::convertMouseToWorldCoord(TestGLCanvas *canvas, glm::vec3 mouse_coord) {
+    float x = (GLfloat)((2.0f * mouse_coord.x) / canvas->CANVAS_WIDTH - 1.0f);
+    float y = (GLfloat)(1.0f - (2.0f * mouse_coord.y) / canvas->CANVAS_HEIGHT);
+    float z = (GLfloat)(1.0f);
+    glm::vec3 ray = glm::vec3 (x,y,z);
+
+    glm::vec4 clip = glm::vec4(ray.x, ray.y, -1.0f, 1.0f);
+    glm::vec4 eye = glm::inverse(canvas->getCamera()->projectionMatrix) * clip;
+    eye = glm::vec4(eye.x, eye.y, -1.0f, 0.0f);
+
+    glm::vec4 temp = (glm::inverse(canvas->getCamera()->viewMatrix) * eye);
+//    std::cout << "- temp Vec4: " << glm::to_string(temp) << std::endl;
+    std::cout << " -- temp: " << glm::to_string(temp) << std::endl;
+
+    return glm::vec3(temp.x, temp.y, temp.z);
+//    std::cout << "- ray_world: " << glm::to_string(temp) << std::endl;
+}
 
 // // copy constructor
 // DrawObject::DrawObject(const DrawObject &source){
@@ -799,48 +818,26 @@ void Gridlines::CreateShaderProgram(){
 CursorObj::CursorObj(DrawObject* object) {
     std::cout << "Create our cursor object" << std::endl;
     obj = object;
-    lastPt = new Point();
+    lastPt = glm::vec3(0.0f, 0.0f, 0.0f);
     ray_nds = glm::vec3(0.0f, 0.0f, 0.0f);
     ray_clip = glm::vec4(0.0f, 0.0f, 0.0f, 0.0f);
     ray_eye = glm::vec4(0.0f, 0.0f, 0.0f, 0.0f);
     ray_world = glm::vec3(0.0f, 0.0f, 0.0f);
 }
 
-void CursorObj::moveCursor(TestGLCanvas *canvas, Point* new_pt) {
-    std::cout << "-- Moving cursor" << std::endl;
+void CursorObj::moveCursor(TestGLCanvas *canvas, Point curr_pt) {
+    // std::cout << "-- Moving cursor" << std::endl;
 
-    //Point temp_pt;
-
-    // GLfloat x_temp = new_pt->getX() - this->lastPt->getX();
-    // GLfloat y_temp = new_pt->getY() - this->lastPt->getY();
-    // GLfloat z_temp = new_pt->getZ() - this->lastPt->getZ();
-
-    // std::cout << "NewPt:" << new_pt->getX() << " " << new_pt->getY() << " " << new_pt->getZ() << std::endl;
-    // std::cout << "lastPt:" << lastPt->getX() << " " << lastPt->getY() << " " << lastPt->getZ() << std::endl;
-
-    // std::cout << x_temp << " " << y_temp << " " << z_temp << std::endl;
-
-
-    // temp_pt.setX(new_pt->getX() - this->lastPt->getX());
-    // temp_pt.setY(new_pt->getY() - this->lastPt->getY());
-    // temp_pt.setZ(new_pt->getZ() - this->lastPt->getZ());
-//    std::cout << "Current Pt: " << this->obj->getInsertPt()->Print() << std::endl;
-    std::cout << "Last Pt: " << this->lastPt->Print() << std::endl;
-    std::cout << new_pt->Print() << std::endl;
-    // std::cout << temp_pt.Print() << std::endl;
-    // std::cout << lastPt->Print() << std::endl;
-    // this->lastPt = new_pt;
-    // std::cout << lastPt->Print() << std::endl;
-
+    // perform our ray casting to find the point
     this->normDeviceCoords(canvas, this->ray_nds);
     this->homogenClipCoords(this->ray_nds, this->ray_clip);
     this->eyeCameraCoords(canvas, ray_eye);
     this->worldCoords(canvas, ray_world);
-    displayRayCastInfo();
+    //displayRayCastInfo();
 
-    this->obj->translateVertices(*new_pt, this->obj->vertices);
-
-
+    // move the cursor object vertices by the displaced amount
+    this->obj->translateVertices((intersectPt-lastPt), this->obj->vertices);
+    lastPt = intersectPt; // store the intersect point as our last point
 }
 
 void CursorObj::Render(TestGLCanvas *orig_canvas) {
@@ -863,7 +860,6 @@ void CursorObj::normDeviceCoords(TestGLCanvas *canvas, glm::vec3 &ray_nds) {
     float y = (GLfloat)(1.0f - (2.0f * canvas->getCurrMousePos()->getY()) / canvas->CANVAS_HEIGHT);
     float z = (GLfloat)(1.0f);
     ray_nds = glm::vec3 (x,y,z);
-
     return;
 }
 
@@ -893,40 +889,23 @@ void CursorObj::worldCoords(TestGLCanvas *canvas, glm::vec3 &ray_world) {
     ray_world = glm::normalize(ray_world);
 //    std::cout << "- normalized ray_world Vec4: " << glm::to_string(ray_world) << std::endl;
 
-
-
- //   glm::vec3 intersect_point = ray_intersect_plane(GraphicsManagerInfo->CameraObj->Position, ray_wor, GraphicsManagerInfo->DrawingGridLine->GetPlane());
     // assuming xy plane intersection
     GLfloat x = 0.0f;
     GLfloat y = 0.0f;
     GLfloat z = 0.0f;
-    glm::vec3 normalVec = glm::vec3(0.0f, 0.0f, 1.0f);
+
     glm::vec3 cameraPt = glm::vec3(canvas->getCamera()->getPos());
 
- //   GLfloat denom = glm::dot(ray_world, normalVec);
- //   GLfloat numerator = glm::dot(cameraPt, normalVec);
- //   GLfloat t = - (numerator) / denom;
- 
     // for XY Plane intersection
     GLfloat t = (z - canvas->getCamera()->getPos().z / ray_world.z);
     // for XZ Plane intersection
-//    GLfloat t = (y - canvas->getCamera()->getPos().y / ray_world.y);
+    //    GLfloat t = (y - canvas->getCamera()->getPos().y / ray_world.y);
     // for YZ Plane intersection
-//    GLfloat t = (x - canvas->getCamera()->getPos().x / ray_world.x);
-
-    // x = canvas->getCamera()->getPos().x + ray_world.x * t;
-    // y = canvas->getCamera()->getPos().y + ray_world.y * t;
-    // z = canvas->getCamera()->getPos().z + ray_world.z * t;
-    // std::cout << "coords: " << x << "," << y << "," << z << std::endl;
-
-    // std::cout << "CameraPt: " << cameraPt.x << " , " << cameraPt.y << " , " << cameraPt.z << std::endl;
+    //    GLfloat t = (x - canvas->getCamera()->getPos().x / ray_world.x);
     // std::cout << "scale factor: " << t << std::endl;
-    intersectPt = cameraPt + ray_world * t;
 
-    std::cout << "intersectPt: " << intersectPt.x << " , " << intersectPt.y << " , " << intersectPt.z << std::endl;
-    // std::cout << "x: " << canvas->getCamera()->getPos().x + (t * ray_world.x)
-    //     << " , " << canvas->getCamera()->getPos().y + (t * ray_world.y)
-    //     << " , " << canvas->getCamera()->getPos().z + (t * ray_world.z) << std::endl;
+    intersectPt = cameraPt + ray_world * t;
+    // std::cout << "intersectPt: " << intersectPt.x << " , " << intersectPt.y << " , " << intersectPt.z << std::endl;
 
     return;
 } 

@@ -134,6 +134,9 @@ TestGLCanvas::TestGLCanvas(wxWindow *parent, int *attribList)
     // setup our camera object -- must be after glewInit();
     m_camera = new Camera(glm::vec3(0.0f, 0.0f, 3.0f));
 
+    // move the pointer to the middle of the window??
+    this->WarpPointer(0.5f * CANVAS_WIDTH, 0.5f * CANVAS_HEIGHT);
+
     // This handles out key stroke captures
     Connect(wxEVT_CHAR,
         wxKeyEventHandler(TestGLCanvas::OnKeyPress));
@@ -286,6 +289,15 @@ void TestGLCanvas::processCameraEvent(wxKeyEvent& event) {
         case 'R':
             str += " -- RESET VIEW";
             getCamera()->ResetCameraView();
+            
+            // move the pointer to the middle of the window??
+            this->WarpPointer(0.5f * CANVAS_WIDTH, 0.5f * CANVAS_HEIGHT);
+            
+            // record the current mouse position after tge warp
+            // and then physically move it on our drawing and then draw the crosshairs
+            setCurrMousePos(0.5f * CANVAS_WIDTH, 0.5f * CANVAS_HEIGHT, 0.0f);
+            ((CursorObj*) m_cursor)->moveCursor(this, Point(0.5f * CANVAS_WIDTH, 0.5f * CANVAS_HEIGHT, 0.0f));
+            m_crosshair->Render(this);
             break;
 
         default:
@@ -367,14 +379,15 @@ void TestGLCanvas::OnMouseMove(wxMouseEvent& event)
     //        std::cout << "==============" << std::endl;
     Point* last_point = getCurrMousePos();  // the old point
     Point curr_point = Point(event.GetX(), event.GetY(), 0);
-    Point dist_moved = curr_point - *last_point;
+    Point dist_moved = curr_point - *last_point;  // the distance moved in window coords
+
     // std::cout << "curr point" << curr_point.Print() << std::endl;
     // std::cout << "last point" << (*(last_point)).Print() << std::endl;;
     // std::cout << "dist moved" << dist_moved.Print() << std::endl; 
 
     setCurrMousePos(event.GetX(), event.GetY(), 0);
 
-    ((CursorObj*) m_cursor)->moveCursor(this, &dist_moved);
+    ((CursorObj*) m_cursor)->moveCursor(this, curr_point);
 
     if(getCamera()->getCameraState()) {
         getCamera()->ProcessMouseMovement((GLfloat)dist_moved.getX(), (GLfloat)-dist_moved.getY(), TRUE);
@@ -509,8 +522,11 @@ void TestGLCanvas::CreateDrawObj() {
         drawObjects.push_back(m_gridlines);
         m_xy_grid = new Gridlines(this, 0.25f, 0.10f, 0.10f, XY_PLANE);
         drawObjects.push_back(m_xy_grid);
+        
         m_xz_grid = new Gridlines(this, 0.25f, 0.10f, 0.10f, XZ_PLANE);
+        m_xz_grid->isVisible = true;
         drawObjects.push_back(m_xz_grid);
+
         m_yz_grid = new Gridlines(this, 0.25f, 0.10f, 0.10f, YZ_PLANE);
         drawObjects.push_back(m_yz_grid);
     }
@@ -520,7 +536,7 @@ void TestGLCanvas::CreateDrawObj() {
     ((CursorObj*) m_cursor)->obj->color = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
 //    m_cursor->scale = 0.f;
     ((CursorObj*) m_cursor)->obj->scaleObj(0.05f, ((CursorObj*) m_cursor)->obj->vertices);
-    ((CursorObj*) m_cursor)->obj->translateVertices(Point(0.75f, 0.75f, 0.0f), ((CursorObj*) m_cursor)->obj->vertices);
+    ((CursorObj*) m_cursor)->obj->translateVertices(glm::vec3(0.0f, 0.0f, 0.0f), ((CursorObj*) m_cursor)->obj->vertices);
 
     // ((Gridlines*)((CursorObj*) m_cursor)->obj)->scaleObj(0.05f);
     // ((Gridlines*)((CursorObj*) m_cursor)->obj)->translateVertices(
