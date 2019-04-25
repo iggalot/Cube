@@ -82,7 +82,6 @@ TestGLCanvas::TestGLCanvas(wxWindow *parent, int *attribList)
     m_currMousePos = new Point();
     m_crosshair = NULL;
     m_gridlines = NULL;
-    m_camera = NULL;
     m_cursor = NULL;  // our cursor object
 
 //    m_crosshair = new Crosshairs(this);
@@ -116,6 +115,8 @@ TestGLCanvas::TestGLCanvas(wxWindow *parent, int *attribList)
 
     glewExperimental = GL_TRUE;
     GLenum err = glewInit();
+    glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LEQUAL);
 
     if(err != GLEW_OK) {
         std::cout << "Error #: " << glGetError() << " str: " << glewGetErrorString(err) << std::endl;;
@@ -132,7 +133,7 @@ TestGLCanvas::TestGLCanvas(wxWindow *parent, int *attribList)
         std::cout << "GlewInit() okay" << std::endl; 
 
     // setup our camera object -- must be after glewInit();
-    m_camera = new Camera(glm::vec3(0.0f, 0.0f, 3.0f));
+    m_camera = new Camera(glm::vec3(0.0f, 0.25f, 3.0f));
 
     // move the pointer to the middle of the window??
     this->WarpPointer(0.5f * CANVAS_WIDTH, 0.5f * CANVAS_HEIGHT);
@@ -504,15 +505,6 @@ void TestGLCanvas::CreateDrawObj() {
      //   DrawObject *dice = new Dice(this);
     // std::cout << "-- Create Dice" << std::endl;
     // drawObjects.push_back(new Dice(this));
-    std::cout << "-- Create Triangle" << std::endl;
-    drawObjects.push_back(new Triangle(this));
-
-    std::cout << "-- Create Crosshairs" << std::endl;
-    // create our crosshairs
-    if(m_crosshair == NULL) {
-        m_crosshair = new Crosshairs(this);
-        drawObjects.push_back(m_crosshair);
-    }
 
     std::cout << "-- Create Gridlines" << std::endl;
     // create our gridlines
@@ -529,6 +521,16 @@ void TestGLCanvas::CreateDrawObj() {
 
         m_yz_grid = new Gridlines(this, 0.25f, 0.10f, 0.10f, YZ_PLANE);
         drawObjects.push_back(m_yz_grid);
+    }
+
+    std::cout << "-- Create Triangle" << std::endl;
+    drawObjects.push_back(new Triangle(this));
+
+    std::cout << "-- Create Crosshairs" << std::endl;
+    // create our crosshairs
+    if(m_crosshair == NULL) {
+        m_crosshair = new Crosshairs(this);
+        drawObjects.push_back(m_crosshair);
     }
 
     std::cout << "-- Create cursor" << std::endl;

@@ -186,9 +186,9 @@ TestGLContext::TestGLContext(wxGLCanvas *canvas)
     glLightfv(GL_LIGHT0, GL_AMBIENT, ambient);
 
     // set viewing projection
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    glFrustum(-0.5f, 0.5f, -0.5f, 0.5f, 1.0f, 3.0f);
+//    glMatrixMode(GL_PROJECTION);
+//    glLoadIdentity();
+//    glFrustum(-0.5f, 0.5f, -0.5f, 0.5f, 1.0f, 3.0f);
 
     // create the textures to use for cube sides: they will be reused by all
     // canvases (which is probably not critical in the case of simple textures
